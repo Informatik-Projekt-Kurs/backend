@@ -1,37 +1,58 @@
 package com.MeetMate.user;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
+    @SequenceGenerator(
+            name = "user_sequence",
+            sequenceName = "user_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "user_sequence"
+    )
     private Long id;
-    private List<String> name;
+    private List<String> name; //Single string
     private LocalDate birthday;
     private String email;
-    private int age;
+    private String password;
+    //enum Rolle
+    //date Acc created
+    //Last login
+    //(refresh token)
+    //bool verified
+    @Transient //No need for column in database
+    int age;
 
     public User() {
     }
 
-    public User(Long id,
-                List<String> name,
-                LocalDate birthday,
-                String email) {
+    public User(Long id, List<String> name, LocalDate birthday, String email, String password) {
         this.id = id;
         this.name = name;
         this.birthday = birthday;
         this.email = email;
-        age = (int)Math.floor(Period.between(birthday, LocalDate.now()).toTotalMonths()/12);
+        this.password = password;
     }
 
-    public User(List<String> name,
-                LocalDate birthday,
-                String email) {
+    public User(List<String> name, LocalDate birthday, String email, String password) {
         this.name = name;
         this.birthday = birthday;
         this.email = email;
-        age = (int)Math.floor(Period.between(birthday, LocalDate.now()).toTotalMonths()/12);
+        this.password = password;
+    }
+
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
     }
 
     public Long getId() {
@@ -66,8 +87,16 @@ public class User {
         this.email = email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public int getAge() {
-        return age;
+        return Period.between(birthday, LocalDate.now()).getYears();
     }
 
     @Override
@@ -80,4 +109,5 @@ public class User {
                 ", age=" + age +
                 '}';
     }
+
 }
