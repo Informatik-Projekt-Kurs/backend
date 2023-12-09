@@ -1,6 +1,7 @@
 package com.MeetMate.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,11 +22,17 @@ public class UserController {
         return userService.getUsers();
     }
 
-    @PostMapping
-    public void registerNewUser(@RequestBody String hallo){
-                                    //User user) {
-        userService.printBody(hallo);
-        //userService.addNewUser(user);
+//    @PostMapping
+////    public void registerNewUser(@RequestBody StreamingHttpOutputMessage.Body hallo){
+////                                    //User user) {
+////        userService.printBody(hallo);
+////        //userService.addNewUser(user);
+////    }
+
+    @PostMapping("/signup")
+    @ResponseBody
+    public String registerNewUser(@RequestBody MultiValueMap<String, String> formData) {
+        return userService.addNewUser(formData);
     }
 
 }

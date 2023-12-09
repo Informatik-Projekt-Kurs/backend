@@ -20,31 +20,39 @@ public class User {
             generator = "user_sequence"
     )
     private Long id;
-    private List<String> name;
+    private List<String> name; //Single string
     private LocalDate birthday;
     private String email;
+    private String password;
+    //enum Rolle
+    //date Acc created
+    //Last login
+    //(refresh token)
+    //bool verified
     @Transient //No need for column in database
-    private int age;
+    int age;
 
     public User() {
     }
 
-    public User(Long id,
-                List<String> name,
-                LocalDate birthday,
-                String email) {
+    public User(Long id, List<String> name, LocalDate birthday, String email, String password) {
         this.id = id;
         this.name = name;
         this.birthday = birthday;
         this.email = email;
+        this.password = password;
     }
 
-    public User(List<String> name,
-                LocalDate birthday,
-                String email) {
+    public User(List<String> name, LocalDate birthday, String email, String password) {
         this.name = name;
         this.birthday = birthday;
         this.email = email;
+        this.password = password;
+    }
+
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
     }
 
     public Long getId() {
@@ -77,6 +85,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public int getAge() {

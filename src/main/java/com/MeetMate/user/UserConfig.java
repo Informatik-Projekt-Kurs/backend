@@ -17,17 +17,19 @@ public class UserConfig {
             User carl = new User(
                     List.of("Carl", "A"),
                     LocalDate.of(2000, Month.JANUARY, 21),
-                    "carl.A@gmail.com"
+                    "carl.A@gmail.com",
+                    "carl123"
             );
 
-            User hannah = new User(
+            User karlotta = new User(
                     List.of("Karlotta", "B"),
                     LocalDate.of(2006, Month.OCTOBER, 14),
-                    "karlotta.b@gmail.com"
+                    "karlotta.b@gmail.com",
+                    "karlotta123"
             );
 
-            repository.saveAll(
-                    List.of(carl, hannah));
+//            repository.saveAll(
+//                    List.of(carl, karlotta));
         };
     }
 }
