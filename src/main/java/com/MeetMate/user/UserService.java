@@ -1,13 +1,11 @@
 package com.MeetMate.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -19,32 +17,37 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<User> getUsers(){
+    public List<User> getUsers() {
         return userRepository.findAll();
     }
 
-//    public void addNewUser(User user) {
-//        System.out.println(user);
-//        //userRepository.save(user);
-//    }
-
-    public String addNewUser(MultiValueMap<String, String> data) {
+    public void addNewUser(MultiValueMap<String, String> data) {
         String email = data.getFirst("email");
         String password = data.getFirst("password");
 
         User user = new User(email, password);
 
-        if (email != null && password != null && !email.isEmpty() && !password.isEmpty()){
-        System.out.println(email);
-        System.out.println(password);
+        if (email != null && password != null && !email.isEmpty() && !password.isEmpty()) {
+            System.out.println(email);
+            System.out.println(password);
+
+            //check if user already exists
+            Optional<User> userOptional = userRepository.findUserByEmail(email);
+            userRepository.findUserByEmail(email);
+            if (userOptional.isPresent()) {
+                throw new IllegalStateException("Email taken");
+            }
 
             userRepository.save(user);
-            return "Successfully created User";
-        } else return "Error";
+        }
 
     }
 
-    public void printBody(StreamingHttpOutputMessage.Body test){
-        System.out.println(test.toString());
+    public void deleteUser(Long userId) {
+        boolean exists = userRepository.existsById(userId);
+        if (!exists) {
+            throw new IllegalStateException("User does not exist");
+        }
+        userRepository.deleteById(userId);
     }
 }
