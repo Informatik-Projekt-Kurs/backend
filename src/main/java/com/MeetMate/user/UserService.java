@@ -17,6 +17,15 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    public User getUser(Long userId) {
+        Optional<User> userOptional = userRepository.findUserById(userId);
+        userRepository.findUserById(userId);
+        if (userOptional.isPresent()) {
+            return userOptional.get();
+        }
+        throw new IllegalStateException("User does not exist");
+    }
+
     public List<User> getUsers() {
         return userRepository.findAll();
     }
@@ -40,7 +49,6 @@ public class UserService {
 
             userRepository.save(user);
         }
-
     }
 
     public void deleteUser(Long userId) {

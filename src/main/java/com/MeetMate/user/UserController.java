@@ -17,21 +17,26 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
+    @GetMapping(path = "get")
+    public User getUser(@RequestParam(name = "id") Long userId) {
+        return userService.getUser(userId);
+    }
+
+    @GetMapping(path = "getAll")
     public List<User> getUsers(){
         return userService.getUsers();
     }
 
-    @PostMapping
+    @PostMapping(path = "post")
     @ResponseBody
     public void registerNewUser(@RequestBody MultiValueMap<String, String> formData) {
         userService.addNewUser(formData);
     }
 
-    @DeleteMapping(path = "{userId}")
-    public void deleteUser(@PathVariable("userId") Long userId) {
+    @DeleteMapping(path = "delete")
+    @ResponseBody
+    public void deleteUser(@RequestParam(name = "id") Long userId) {
         userService.deleteUser(userId);
     }
-
 
 }
