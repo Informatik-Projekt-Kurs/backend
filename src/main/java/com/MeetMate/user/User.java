@@ -3,6 +3,7 @@ package com.MeetMate.user;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.Period;
 import java.util.List;
 
@@ -20,34 +21,41 @@ public class User {
             generator = "user_sequence"
     )
     private Long id;
-    private List<String> name; //Single string
+    private String name;
     private LocalDate birthday;
+    private LocalDate created;
     private String email;
     private String password;
     //enum Rolle
-    //date Acc created
     //Last login
     //(refresh token)
     //bool verified
-    @Transient //No need for column in database
+
+    //No need for column in database
+    @Transient
     int age;
 
     public User() {
     }
 
-    public User(Long id, List<String> name, LocalDate birthday, String email, String password) {
+    public User(Long id, String name, LocalDate birthday, String email, String password) {
         this.id = id;
         this.name = name;
         this.birthday = birthday;
         this.email = email;
         this.password = password;
+        this.created = LocalDate.now();
+        if (birthday == null) {
+            birthday = LocalDate.of(1970, Month.JANUARY, 1);
+        }
     }
 
-    public User(List<String> name, LocalDate birthday, String email, String password) {
+    public User(String name, LocalDate birthday, String email, String password) {
         this.name = name;
         this.birthday = birthday;
         this.email = email;
         this.password = password;
+        this.created = LocalDate.now();
     }
 
     public User(String email, String password) {
@@ -63,15 +71,16 @@ public class User {
         this.id = id;
     }
 
-    public List<String> getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(List<String> name) {
+    public void setName(String name) {
         this.name = name;
     }
 
     public LocalDate getBirthday() {
+        if(this.birthday == null) birthday = LocalDate.EPOCH;
         return birthday;
     }
 
@@ -96,16 +105,23 @@ public class User {
     }
 
     public int getAge() {
-        return Period.between(birthday, LocalDate.now()).getYears();
+        return Period.between(getBirthday(), LocalDate.now()).getYears();
     }
+
+    public LocalDate getCreated() {
+        return created;
+    }
+
 
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", name=" + name +
+                ", name='" + name + '\'' +
                 ", birthday=" + birthday +
+                ", created=" + created +
                 ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
                 ", age=" + age +
                 '}';
     }

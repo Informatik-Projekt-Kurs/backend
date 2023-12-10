@@ -22,17 +22,16 @@ public class UserController {
         return userService.getUsers();
     }
 
-//    @PostMapping
-////    public void registerNewUser(@RequestBody StreamingHttpOutputMessage.Body hallo){
-////                                    //User user) {
-////        userService.printBody(hallo);
-////        //userService.addNewUser(user);
-////    }
-
-    @PostMapping("/signup")
+    @PostMapping
     @ResponseBody
-    public String registerNewUser(@RequestBody MultiValueMap<String, String> formData) {
-        return userService.addNewUser(formData);
+    public void registerNewUser(@RequestBody MultiValueMap<String, String> formData) {
+        userService.addNewUser(formData);
     }
+
+    @DeleteMapping(path = "{userId}")
+    public void deleteUser(@PathVariable("userId") Long userId) {
+        userService.deleteUser(userId);
+    }
+
 
 }

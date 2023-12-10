@@ -15,21 +15,21 @@ public class UserConfig {
     CommandLineRunner commandLineRunner(UserRepository repository) {
         return args -> {
             User carl = new User(
-                    List.of("Carl", "A"),
+                    "Carl A",
                     LocalDate.of(2000, Month.JANUARY, 21),
                     "carl.A@gmail.com",
                     "carl123"
             );
 
             User karlotta = new User(
-                    List.of("Karlotta", "B"),
+                    "Karlotta B",
                     LocalDate.of(2006, Month.OCTOBER, 14),
                     "karlotta.b@gmail.com",
                     "karlotta123"
             );
 
-//            repository.saveAll(
-//                    List.of(carl, karlotta));
+            repository.saveAll(
+                    List.of(carl, karlotta));
         };
     }
 }

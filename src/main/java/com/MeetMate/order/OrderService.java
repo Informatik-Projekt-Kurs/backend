@@ -14,7 +14,7 @@ public class OrderService {
         return List.of(
                 new Order(
                         1234567890L,
-                        new User(1L, List.of("Carl", "B"), LocalDate.of(2006, Month.OCTOBER, 14), "hello@gmail.com")
+                        new User(1L, "Carl B", LocalDate.of(2006, Month.OCTOBER, 14), "hello@gmail.com", "carl123")
                 )
         );
     }
