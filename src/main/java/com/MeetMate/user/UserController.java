@@ -1,8 +1,11 @@
 package com.MeetMate.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.StreamingHttpOutputMessage;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.service.annotation.PutExchange;
 
 import java.util.List;
 
@@ -23,18 +26,22 @@ public class UserController {
     }
 
     @GetMapping(path = "getAll")
-    public List<User> getUsers(){
-        return userService.getUsers();
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @PostMapping(path = "post")
-    @ResponseBody
     public void registerNewUser(@RequestBody MultiValueMap<String, String> formData) {
         userService.addNewUser(formData);
     }
 
+    @PostMapping(path = "put")
+    public void updateUser(@RequestBody MultiValueMap<String, String> formData) {
+        System.out.println(formData);
+        userService.updateUser(formData);
+    }
+
     @DeleteMapping(path = "delete")
-    @ResponseBody
     public void deleteUser(@RequestParam(name = "id") Long userId) {
         userService.deleteUser(userId);
     }

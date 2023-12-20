@@ -32,7 +32,7 @@ public class User {
 
     //No need for column in database
     @Transient
-    int age;
+    private int age;
 
     public User() {
     }
@@ -79,7 +79,7 @@ public class User {
     }
 
     public LocalDate getBirthday() {
-        if(this.birthday == null) birthday = LocalDate.EPOCH;
+        if (this.birthday == null) birthday = LocalDate.EPOCH;
         return birthday;
     }
 
