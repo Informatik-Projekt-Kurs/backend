@@ -1,13 +1,10 @@
 package com.MeetMate.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
 @RestController
 @RequestMapping(path = "api/test/user")
@@ -31,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping(path = "post")
-    public void registerNewUser(@RequestBody MultiValueMap<String, String> formData) {
+    public void registerNewUser(@RequestParam MultiValueMap<String, String> formData) {
         userService.addNewUser(formData);
     }
 
