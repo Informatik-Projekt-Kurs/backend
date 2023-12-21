@@ -21,6 +21,7 @@ public class UserService {
 
     public User getUser(Long userId) {
         Optional<User> userOptional = userRepository.findUserById(userId);
+        // ???
         userRepository.findUserById(userId);
         if (userOptional.isPresent()) {
             return userOptional.get();
@@ -70,7 +71,7 @@ public class UserService {
 
         if (userRepository.findUserByEmail(email).isEmpty()) {
             user.setEmail(email);
-        }
+        } // throw error
         user.setPassword(password);
     }
 

@@ -1,13 +1,13 @@
 package com.MeetMate.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.StreamingHttpOutputMessage;
-import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.http.MediaType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.service.annotation.PutExchange;
 
 import java.util.List;
+
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
 @RestController
 @RequestMapping(path = "api/test/user")
@@ -35,8 +35,8 @@ public class UserController {
         userService.addNewUser(formData);
     }
 
-    @PostMapping(path = "put")
-    public void updateUser(@RequestBody MultiValueMap<String, String> formData) {
+    @PutMapping(path = "put")
+    public void updateUser(@RequestParam MultiValueMap<String, String> formData) {
         System.out.println(formData);
         userService.updateUser(formData);
     }
