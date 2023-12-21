@@ -1,5 +1,7 @@
 package com.MeetMate.user;
 
+import jakarta.transaction.Transactional;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -17,7 +19,16 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<User> getUsers() {
+    public User getUser(Long userId) {
+        Optional<User> userOptional = userRepository.findUserById(userId);
+        userRepository.findUserById(userId);
+        if (userOptional.isPresent()) {
+            return userOptional.get();
+        }
+        throw new IllegalStateException("User does not exist");
+    }
+
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
@@ -40,7 +51,27 @@ public class UserService {
 
             userRepository.save(user);
         }
+    }
 
+    //doesn't need repository methods
+    @Transactional
+    public void updateUser(MultiValueMap<String, String> data) {
+        long id;
+        try {
+            id = Long.parseLong(data.getFirst("id"));
+        } catch (NumberFormatException nfe) {
+            throw new IllegalStateException("Invalid id");
+        }
+        String email = data.getFirst("email");
+        String password = data.getFirst("password");
+
+        // is converted from optional to user bc it always exists
+        User user = userRepository.findUserById(id).orElseThrow(() -> new IllegalStateException("User does not exist."));
+
+        if (userRepository.findUserByEmail(email).isEmpty()) {
+            user.setEmail(email);
+        }
+        user.setPassword(password);
     }
 
     public void deleteUser(Long userId) {
@@ -50,4 +81,5 @@ public class UserService {
         }
         userRepository.deleteById(userId);
     }
+
 }

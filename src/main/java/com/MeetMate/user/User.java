@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Period;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -23,7 +22,7 @@ public class User {
     private Long id;
     private String name;
     private LocalDate birthday;
-    private LocalDate created;
+    private LocalDate createdAt;
     private String email;
     private String password;
     //enum Rolle
@@ -33,7 +32,7 @@ public class User {
 
     //No need for column in database
     @Transient
-    int age;
+    private int age;
 
     public User() {
     }
@@ -44,7 +43,7 @@ public class User {
         this.birthday = birthday;
         this.email = email;
         this.password = password;
-        this.created = LocalDate.now();
+        this.createdAt = LocalDate.now();
         if (birthday == null) {
             birthday = LocalDate.of(1970, Month.JANUARY, 1);
         }
@@ -55,7 +54,7 @@ public class User {
         this.birthday = birthday;
         this.email = email;
         this.password = password;
-        this.created = LocalDate.now();
+        this.createdAt = LocalDate.now();
     }
 
     public User(String email, String password) {
@@ -80,7 +79,7 @@ public class User {
     }
 
     public LocalDate getBirthday() {
-        if(this.birthday == null) birthday = LocalDate.EPOCH;
+        if (this.birthday == null) birthday = LocalDate.EPOCH;
         return birthday;
     }
 
@@ -108,10 +107,9 @@ public class User {
         return Period.between(getBirthday(), LocalDate.now()).getYears();
     }
 
-    public LocalDate getCreated() {
-        return created;
+    public LocalDate getCreatedAt() {
+        return createdAt;
     }
-
 
     @Override
     public String toString() {
@@ -119,7 +117,7 @@ public class User {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", birthday=" + birthday +
-                ", created=" + created +
+                ", createdAt=" + createdAt +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", age=" + age +
