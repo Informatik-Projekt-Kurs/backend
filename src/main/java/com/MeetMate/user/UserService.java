@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
+import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Optional;
+
 
 @Service
 public class UserService {
@@ -21,6 +23,7 @@ public class UserService {
 
     public User getUser(Long userId) {
         Optional<User> userOptional = userRepository.findUserById(userId);
+        // ???
         userRepository.findUserById(userId);
         if (userOptional.isPresent()) {
             return userOptional.get();
@@ -70,7 +73,7 @@ public class UserService {
 
         if (userRepository.findUserByEmail(email).isEmpty()) {
             user.setEmail(email);
-        }
+        } // throw error
         user.setPassword(password);
     }
 
