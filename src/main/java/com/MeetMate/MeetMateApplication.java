@@ -8,9 +8,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 //@EnableConfigurationProperties
 //@EntityScan(basePackages = {"com.MeetMate.user"}) //force scan the packages
-public class Main {
+public class MeetMateApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Main.class, args);
+        SpringApplication.run(MeetMateApplication.class, args);
     }
 }
