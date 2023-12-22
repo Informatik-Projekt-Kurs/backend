@@ -18,11 +18,13 @@ public class UserController {
     }
 
     @GetMapping(path = "get")
+    @ResponseBody
     public User getUser(@RequestParam(name = "id") Long userId) {
         return userService.getUser(userId);
     }
 
     @GetMapping(path = "getAll")
+    @ResponseBody
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
