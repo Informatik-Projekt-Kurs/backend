@@ -34,5 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         //beginIndex is 7 bc "Bearer " is 7
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractUserEmail(jwt);
+        //Object i = jwtService.extractClaimCool(jwt,"age");
     }
 }

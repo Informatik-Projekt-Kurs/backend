@@ -16,7 +16,8 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
-public class User {
+public class User //implements UserDetails
+{
     @Id
     @SequenceGenerator(
             name = "user_sequence",
