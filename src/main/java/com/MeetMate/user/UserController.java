@@ -20,7 +20,7 @@ public class UserController {
     @GetMapping(path = "get")
     @ResponseBody
     public User getUser(@RequestParam(name = "id") Long userId) {
-        return userService.getUser(userId);
+        return userService.getUserById(userId);
     }
 
     @GetMapping(path = "getAll")

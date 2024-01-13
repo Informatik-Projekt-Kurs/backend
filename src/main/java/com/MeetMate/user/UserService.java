@@ -1,5 +1,6 @@
 package com.MeetMate.user;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,14 +19,22 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User getUser(Long userId) {
+    public User getUserById(Long userId) {
         Optional<User> userOptional = userRepository.findUserById(userId);
-        // ???
-        userRepository.findUserById(userId);
-        if (userOptional.isPresent()) {
-            return userOptional.get();
-        }
-        throw new IllegalStateException("User does not exist");
+        return userRepository.findUserById(userId).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+    }
+
+    public User getUserByEmail(String userEmail) {
+        Optional<User> userOptional = userRepository.findUserByEmail(userEmail);
+        return userRepository.findUserByEmail(userEmail).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+    }
+
+    public UserService test(){
+        return new UserService(userRepository){
+            public User getbyEmail(String email) throws EntityNotFoundException{
+                return userRepository.findUserByEmail(email).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+            }
+        };
     }
 
     public List<User> getAllUsers() {
