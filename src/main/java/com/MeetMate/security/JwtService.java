@@ -1,11 +1,17 @@
 package com.MeetMate.security;
 
+import com.MeetMate.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.MultiValueMap;
 
 import java.security.Key;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.function.Function;
 
 public class JwtService {
@@ -13,8 +19,20 @@ public class JwtService {
     //Test key
     private static final String SECRET_KEY = "a24077e68b6fc44428cef75c23d8e9fa70c0bfe2851acbc584cae293cd674b66";
 
+    //Claims::getSubject
     public String extractUserEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, Claims -> Claims.getSubject());
+    }
+
+    public String generateToken(MultiValueMap<String, Object> claims, User user) {
+        return Jwts
+                .builder()
+                .setSubject(user.getEmail())
+                .setClaims(claims)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     //Extract claim of Type ContentType
