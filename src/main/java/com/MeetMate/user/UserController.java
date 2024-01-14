@@ -1,6 +1,7 @@
 package com.MeetMate.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,15 +30,20 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PostMapping(path = "post")
-    public void registerNewUser(@RequestParam MultiValueMap<String, String> formData) {
-        userService.addNewUser(formData);
+    @PostMapping(path = "register")
+    public void registerNewUser(@RequestParam String token) {
+        userService.registerNewUser(token);
     }
 
     @PutMapping(path = "put")
     public void updateUser(@RequestParam MultiValueMap<String, String> formData) {
         System.out.println(formData);
         userService.updateUser(formData);
+    }
+
+    @PostMapping(path = "auth")
+    public ResponseEntity<String> authenticateUser(@RequestParam String token){
+        return ResponseEntity.ok(userService.authenticateUser(token));
     }
 
     @DeleteMapping(path = "delete")

@@ -1,5 +1,6 @@
 package com.MeetMate.user;
 
+import com.MeetMate.Experiments.Experimentational;
 import com.MeetMate.roles.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,8 +17,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
-public class User //implements UserDetails
-{
+public class User implements UserDetails{
     @Id
     @SequenceGenerator(
             name = "user_sequence",
@@ -56,7 +56,7 @@ public class User //implements UserDetails
         this.password = password;
         this.createdAt = LocalDate.now();
         if (birthday == null) {
-            birthday = LocalDate.of(1970, Month.JANUARY, 1);
+            birthday = LocalDate.EPOCH;
         }
     }
 
@@ -66,8 +66,10 @@ public class User //implements UserDetails
         this.email = email;
         this.password = password;
         this.createdAt = LocalDate.now();
+        role = Role.CLIENT;
     }
 
+    @Experimentational
     public User(String email, String password) {
         this.email = email;
         this.password = password;
@@ -78,38 +80,38 @@ public class User //implements UserDetails
     }
 
     //List of Roles
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return List.of(new SimpleGrantedAuthority(role.name()));
-//    }
-//
-//    @Override
-//    public String getUsername() {
-//        return email;
-//    }
-//
-//    @Override
-//    public String getPassword() {
-//        return password;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonExpired() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonLocked() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isCredentialsNonExpired() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isEnabled() {
-//        return true;
-//    }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

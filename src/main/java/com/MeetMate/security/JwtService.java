@@ -2,26 +2,29 @@ package com.MeetMate.security;
 
 import com.MeetMate.Experiments.Experimentational;
 import com.MeetMate.user.User;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
+@Service
 public class JwtService {
 
     //Test key
     private static final String SECRET_KEY = "a24077e68b6fc44428cef75c23d8e9fa70c0bfe2851acbc584cae293cd674b66";
 
-    public Boolean isTokenValid(String token, User user) {
+    public Boolean isTokenValid(String token, UserDetails userDetails) {
         final String email = extractUserEmail(token);
-        return email.equals(user.getEmail()) && !isTokenExpired(token);
+        return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -29,7 +32,7 @@ public class JwtService {
         return expirationDate < System.currentTimeMillis();
     }
 
-    public String generateToken(Map<String, Object> claims, User user) {
+    public String generateToken(Map<String, Object> claims, @NotNull User user) {
         return Jwts
                 .builder()
                 .setSubject(user.getEmail())
@@ -47,7 +50,7 @@ public class JwtService {
 
     @Experimentational
     @SuppressWarnings("unchecked")
-    public <ContentType> ContentType extractClaimGeneric(String token, String claimName) {
+    public <ContentType> ContentType extractClaimGeneric(String claimName, String token) {
         Claims claims = extractAllClaims(token);
         return (ContentType) claims.get(claimName);
     }

@@ -1,23 +1,27 @@
 package com.MeetMate.user;
 
+import com.MeetMate.security.JwtService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     public User getUserById(Long userId) {
         Optional<User> userOptional = userRepository.findUserById(userId);
@@ -29,28 +33,18 @@ public class UserService {
         return userRepository.findUserByEmail(userEmail).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
     }
 
-    public UserService test(){
-        return new UserService(userRepository){
-            public User getbyEmail(String email) throws EntityNotFoundException{
-                return userRepository.findUserByEmail(email).orElseThrow(() -> new EntityNotFoundException("User does not exist"));
-            }
-        };
-    }
-
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public void addNewUser(MultiValueMap<String, String> data) {
-        String email = data.getFirst("email");
-        String password = data.getFirst("password");
+    public String registerNewUser(String token) {
+        String email = jwtService.extractClaimGeneric("email", token);
+        String name = jwtService.extractClaimGeneric("name", token);
+        String password = jwtService.extractClaimGeneric("password", token);
 
-        User user = new User(email, password);
+        User user = new User(name, LocalDate.EPOCH, email, passwordEncoder.encode(password));
 
         if (email != null && password != null && !email.isEmpty() && !password.isEmpty()) {
-            System.out.println(email);
-            System.out.println(password);
-
             //check if user already exists
             Optional<User> userOptional = userRepository.findUserByEmail(email);
             userRepository.findUserByEmail(email);
@@ -59,7 +53,22 @@ public class UserService {
             }
 
             userRepository.save(user);
+            return jwtService.generateToken(null, user);
         }
+        throw new EntityNotFoundException("User not found");
+    }
+
+    public String authenticateUser(String token) {
+        String email = jwtService.extractUserEmail(token);
+        String password = jwtService.extractClaim(token, Claims -> Claims.get("password", String.class));
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password));
+
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        return jwtService.generateToken(null, user);
     }
 
     //doesn't need repository methods
