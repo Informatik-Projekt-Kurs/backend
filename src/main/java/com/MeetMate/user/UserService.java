@@ -72,7 +72,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(String token) {
+    public String updateUser(String token) {
         String email = jwtService.extractClaimGeneric("email", token);
         String name = jwtService.extractClaimGeneric("name", token);
         String password = jwtService.extractClaimGeneric("password", token);
@@ -87,6 +87,7 @@ public class UserService {
         if (password != null) user.setPassword(password);
         if (name != null) user.setName(name);
         if (birthday != null) user.setBirthday(birthday);
+        return jwtService.generateToken(null, user);
     }
 
     public void deleteUser(String token) {

@@ -3,13 +3,15 @@ package com.MeetMate.user;
 import com.MeetMate.Experiments.Experimentational;
 import com.MeetMate.roles.Role;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.Period;
 import java.util.Collection;
 import java.util.List;
