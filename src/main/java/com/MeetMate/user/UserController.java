@@ -1,12 +1,12 @@
 package com.MeetMate.user;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.StringBufferInputStream;
+import javax.naming.NameAlreadyBoundException;
 import java.util.List;
 
 @RestController
@@ -19,38 +19,90 @@ public class UserController {
     @GetMapping(path = "get")
     @ResponseBody
     public ResponseEntity<User> getUser(@RequestParam String token) {
-        return ResponseEntity.ok(userService.getUserByEmail(token));
+        try {
+            return ResponseEntity
+                    .ok(
+                            userService.getUserByEmail(token));
+
+        } catch (EntityNotFoundException enfe) {
+            return ResponseEntity
+                    .notFound()
+                    .header(enfe.getMessage())
+                    .build();
+        }
     }
 
     @GetMapping(path = "getAll")
     @ResponseBody
     public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+        return ResponseEntity.ok(
+                userService.getAllUsers());
     }
 
     @PostMapping(path = "register")
     @ResponseBody
     public ResponseEntity<String> registerNewUser(@RequestParam String token) {
-        return ResponseEntity.ok(userService.registerNewUser(token));
+        try {
+            return ResponseEntity.ok(
+                    userService.registerNewUser(token));
+
+        } catch (NameAlreadyBoundException nabe) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .header(nabe.getMessage())
+                    .build();
+
+        } catch (IllegalArgumentException iae) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_ACCEPTABLE)
+                    .header(iae.getMessage())
+                    .build();
+        }
     }
 
     @PutMapping(path = "update")
     @ResponseBody
     public ResponseEntity<String> updateUser(@RequestParam String token) {
-        userService.updateUser(token);
+        try {
+            return ResponseEntity.ok(
+                    userService.updateUser(token));
+
+        } catch (EntityNotFoundException enfe) {
+            return ResponseEntity
+                    .notFound()
+                    .header(enfe.getMessage())
+                    .build();
+        }
     }
 
     @PostMapping(path = "auth")
     @ResponseBody
-    public ResponseEntity<String> authenticateUser(@RequestParam String token){
-        return ResponseEntity.ok(userService.authenticateUser(token));
+    public ResponseEntity<String> authenticateUser(@RequestParam String token) {
+        try {
+            return ResponseEntity.ok(
+                    userService.authenticateUser(token));
+
+        } catch (EntityNotFoundException enfe) {
+            return ResponseEntity
+                    .notFound()
+                    .header(enfe.getMessage())
+                    .build();
+        }
     }
 
     @DeleteMapping(path = "delete")
     @ResponseBody
     public ResponseEntity<?> deleteUser(@RequestParam String token) {
-        userService.deleteUser(token);
-        return ResponseEntity.noContent().build();
+        try {
+            userService.deleteUser(token);
+            return ResponseEntity.noContent().build();
+
+        } catch (EntityNotFoundException enfe) {
+            return ResponseEntity
+                    .notFound()
+                    .header(enfe.getMessage())
+                    .build();
+        }
     }
 
 }

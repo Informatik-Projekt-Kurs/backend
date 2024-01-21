@@ -32,7 +32,7 @@ public class User implements UserDetails{
     )
     private Long id;
     private String name;
-    private LocalDate birthday;
+    //private LocalDate birthday;
     @Setter(AccessLevel.NONE)
     private LocalDate createdAt;
     private String email;
@@ -50,21 +50,22 @@ public class User implements UserDetails{
     public User() {
     }
 
-    public User(Long id, String name, LocalDate birthday, String email, String password) {
+    @Experimentational
+    public User(Long id, String name, String email, String password) {
         this.id = id;
         this.name = name;
-        this.birthday = birthday;
+        //this.birthday = birthday;
         this.email = email;
         this.password = password;
         this.createdAt = LocalDate.now();
-        if (birthday == null) {
-            birthday = LocalDate.EPOCH;
-        }
+//        if (birthday == null) {
+//            birthday = LocalDate.EPOCH;
+//        }
     }
 
-    public User(String name, LocalDate birthday, String email, String password) {
+    public User(String name, String email, String password) {
         this.name = name;
-        this.birthday = birthday;
+        //this.birthday = birthday;
         this.email = email;
         this.password = password;
         this.createdAt = LocalDate.now();
@@ -77,9 +78,9 @@ public class User implements UserDetails{
         this.password = password;
     }
 
-    public int getAge() {
-        return Period.between(getBirthday(), LocalDate.now()).getYears();
-    }
+//    public int getAge() {
+//        return Period.between(getBirthday(), LocalDate.now()).getYears();
+//    }
 
     //List of Roles
     @Override
