@@ -1,48 +1,82 @@
 package com.MeetMate.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.*;
-
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import javax.naming.NameAlreadyBoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "api/test/user")
+@RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+  @GetMapping(path = "get")
+  @ResponseBody
+  public ResponseEntity<User> getUser(@RequestParam String token) {
+    try {
+      return ResponseEntity.ok(userService.getUserByEmail(token));
+
+    } catch (EntityNotFoundException enfe) {
+      return ResponseEntity.notFound().header(enfe.getMessage()).build();
     }
+  }
 
-    @GetMapping(path = "get")
-    @ResponseBody
-    public User getUser(@RequestParam(name = "id") Long userId) {
-        return userService.getUser(userId);
+  @GetMapping(path = "getAll")
+  @ResponseBody
+  public ResponseEntity<List<User>> getAllUsers() {
+    return ResponseEntity.ok(userService.getAllUsers());
+  }
+
+  @PostMapping(path = "register")
+  @ResponseBody
+  public ResponseEntity<String> registerNewUser(@RequestParam String token) {
+    try {
+      return ResponseEntity.ok(userService.registerNewUser(token));
+
+    } catch (NameAlreadyBoundException nabe) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).header(nabe.getMessage()).build();
+
+    } catch (IllegalArgumentException iae) {
+      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header(iae.getMessage()).build();
     }
+  }
 
-    @GetMapping(path = "getAll")
-    @ResponseBody
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+  @PutMapping(path = "update")
+  @ResponseBody
+  public ResponseEntity<String> updateUser(@RequestParam String token) {
+    try {
+      return ResponseEntity.ok(userService.updateUser(token));
+
+    } catch (EntityNotFoundException enfe) {
+      return ResponseEntity.notFound().header(enfe.getMessage()).build();
     }
+  }
 
-    @PostMapping(path = "post")
-    public void registerNewUser(@RequestParam MultiValueMap<String, String> formData) {
-        userService.addNewUser(formData);
+  @PostMapping(path = "auth")
+  @ResponseBody
+  public ResponseEntity<String> authenticateUser(@RequestParam String token) {
+    try {
+      return ResponseEntity.ok(userService.authenticateUser(token));
+
+    } catch (EntityNotFoundException enfe) {
+      return ResponseEntity.notFound().header(enfe.getMessage()).build();
     }
+  }
 
-    @PutMapping(path = "put")
-    public void updateUser(@RequestParam MultiValueMap<String, String> formData) {
-        System.out.println(formData);
-        userService.updateUser(formData);
+  @DeleteMapping(path = "delete")
+  @ResponseBody
+  public ResponseEntity<?> deleteUser(@RequestParam String token) {
+    try {
+      userService.deleteUser(token);
+      return ResponseEntity.noContent().build();
+
+    } catch (EntityNotFoundException enfe) {
+      return ResponseEntity.notFound().header(enfe.getMessage()).build();
     }
-
-    @DeleteMapping(path = "delete")
-    public void deleteUser(@RequestParam(name = "id") Long userId) {
-        userService.deleteUser(userId);
-    }
-
+  }
 }
