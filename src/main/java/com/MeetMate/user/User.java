@@ -17,7 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Entity
 @Table(name = "users")
 @Data
-public class User implements UserDetails {
+public class User implements UserDetails{
   @Id
   @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
@@ -25,8 +25,6 @@ public class User implements UserDetails {
 
   private String name;
 
-  // private LocalDate birthday;
-  @Setter(AccessLevel.NONE)
   private LocalDate createdAt;
 
   private String email;
@@ -49,18 +47,13 @@ public class User implements UserDetails {
   public User(Long id, String name, String email, String password) {
     this.id = id;
     this.name = name;
-    // this.birthday = birthday;
     this.email = email;
     this.password = password;
     this.createdAt = LocalDate.now();
-    //        if (birthday == null) {
-    //            birthday = LocalDate.EPOCH;
-    //        }
   }
 
   public User(String name, String email, String password) {
     this.name = name;
-    // this.birthday = birthday;
     this.email = email;
     this.password = password;
     this.createdAt = LocalDate.now();
@@ -72,10 +65,6 @@ public class User implements UserDetails {
     this.email = email;
     this.password = password;
   }
-
-  //    public int getAge() {
-  //        return Period.between(getBirthday(), LocalDate.now()).getYears();
-  //    }
 
   // List of Roles
   @Override
