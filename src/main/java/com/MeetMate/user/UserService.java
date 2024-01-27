@@ -38,7 +38,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public String registerNewUser(MultiValueMap<String, String> data) throws NameAlreadyBoundException {
+    public void registerNewUser(MultiValueMap<String, String> data) throws NameAlreadyBoundException {
         String email = data.getFirst("email");
         String name = data.getFirst("name");
         String password = data.getFirst("password");
@@ -54,7 +54,6 @@ public class UserService {
             }
 
             userRepository.save(user);
-            return jwtService.generateToken(null, user);
         }
         throw new IllegalArgumentException("Required argument is missing");
     }
