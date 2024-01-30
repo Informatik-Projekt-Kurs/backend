@@ -33,13 +33,22 @@ public class JwtService {
   }
 
   public String generateToken(Map<String, Object> claims, @NotNull User user) {
-    return Jwts.builder()
-        .setSubject(user.getEmail())
-        .setClaims(claims)
-        .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5)) // expires in 5 minutes
-        .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-        .compact();
+    return claims == null
+        ? Jwts.builder() // true
+            .setSubject(user.getEmail())
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(
+                new Date(System.currentTimeMillis() + 1000 * 60 * 5)) // expires in 5 minutes
+            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+            .compact()
+        : Jwts.builder() // false
+            .setSubject(user.getEmail())
+            .setClaims(claims)
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(
+                new Date(System.currentTimeMillis() + 1000 * 60 * 5)) // expires in 5 minutes
+            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+            .compact();
   }
 
   // Claims::getSubject

@@ -6,6 +6,7 @@ import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,11 +33,12 @@ public class UserController {
     return ResponseEntity.ok(userService.getAllUsers());
   }
 
-  @PostMapping(path = "register")
+  @PostMapping(path = "signup")
   @ResponseBody
-  public ResponseEntity<String> registerNewUser(@RequestParam String token) {
+  public ResponseEntity<?> registerNewUser(@RequestParam MultiValueMap<String, String> data) {
     try {
-      return ResponseEntity.ok(userService.registerNewUser(token));
+      userService.registerNewUser(data);
+      return ResponseEntity.ok().build();
 
     } catch (NameAlreadyBoundException nabe) {
       return ResponseEntity.status(HttpStatus.CONFLICT).header(nabe.getMessage()).build();
@@ -48,9 +50,10 @@ public class UserController {
 
   @PutMapping(path = "update")
   @ResponseBody
-  public ResponseEntity<String> updateUser(@RequestParam String token) {
+  public ResponseEntity<String> updateUser(
+      @RequestParam String token, @RequestParam MultiValueMap<String, String> data) {
     try {
-      return ResponseEntity.ok(userService.updateUser(token));
+      return ResponseEntity.ok(userService.updateUser(token, data));
 
     } catch (EntityNotFoundException enfe) {
       return ResponseEntity.notFound().header(enfe.getMessage()).build();

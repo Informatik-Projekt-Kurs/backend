@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 
 @Service
 @RequiredArgsConstructor
@@ -35,11 +36,10 @@ public class UserService {
     return userRepository.findAll();
   }
 
-  public String registerNewUser(String token) throws NameAlreadyBoundException {
-    String email = jwtService.extractClaimGeneric("email", token);
-    String name = jwtService.extractClaimGeneric("name", token);
-    String password = jwtService.extractClaimGeneric("password", token);
-    // LocalDate birthday = jwtService.extractClaimGeneric("birthday", token);
+  public void registerNewUser(MultiValueMap<String, String> data) throws NameAlreadyBoundException {
+    String email = data.getFirst("email");
+    String name = data.getFirst("name");
+    String password = data.getFirst("password");
 
     User user = new User(name, email, passwordEncoder.encode(password));
 
@@ -48,38 +48,30 @@ public class UserService {
         && password != null
         && !password.isEmpty()
         && name != null
-        && !name.isEmpty()
-    /*&& birthday != null*/ ) {
-      // check if user already exists
+        && !name.isEmpty()) {
       Optional<User> userOptional = userRepository.findUserByEmail(email);
       if (userOptional.isPresent()) {
         throw new NameAlreadyBoundException("Email taken");
       }
 
       userRepository.save(user);
-      return jwtService.generateToken(null, user);
     }
     throw new IllegalArgumentException("Required argument is missing");
   }
 
   @Transactional
-  public String updateUser(String token) {
+  public String updateUser(String token, MultiValueMap<String, String> data) {
     String email = jwtService.extractClaimGeneric("email", token);
-    String name = jwtService.extractClaimGeneric("name", token);
-    String password = jwtService.extractClaimGeneric("password", token);
-    // LocalDate birthday = jwtService.extractClaimGeneric("birthday", token);
+    String name = data.getFirst("name");
+    String password = passwordEncoder.encode(data.getFirst("password"));
 
     User user =
         userRepository
             .findUserByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
 
-    if (userRepository.findUserByEmail(email).isEmpty() && email != null) {
-      user.setEmail(email);
-    } // throw error
     if (password != null) user.setPassword(password);
     if (name != null) user.setName(name);
-    // if (birthday != null) user.setBirthday(birthday);
 
     return jwtService.generateToken(null, user);
   }
