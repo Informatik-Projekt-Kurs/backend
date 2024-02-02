@@ -1,3 +1,3 @@
-package com.MeetMate.Experiments;
+package com.MeetMate.experiments;
 
 public @interface Experimentational {}

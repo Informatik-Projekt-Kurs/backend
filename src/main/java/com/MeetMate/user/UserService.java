@@ -1,12 +1,14 @@
 package com.MeetMate.user;
 
+import com.MeetMate.response.AuthenticationResponse;
+import com.MeetMate.response.GetResponse;
+import com.MeetMate.response.RefreshResponse;
 import com.MeetMate.security.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,14 +27,23 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
 
-  public User getUserByEmail(String token) {
+  public GetResponse getUserByEmail(String token) {
     String email = jwtService.extractUserEmail(token);
 
     Optional<User> userOptional = userRepository.findUserByEmail(email);
 
-    return userRepository
-        .findUserByEmail(email)
-        .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+    User user =
+        userRepository
+            .findUserByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+
+    return GetResponse.builder()
+        .id(user.getId())
+        .name(user.getName())
+        .created_at(user.getCreatedAt())
+        .email(user.getEmail())
+        .role(user.getRole())
+        .build();
   }
 
   public List<User> getAllUsers() {
@@ -64,8 +75,8 @@ public class UserService {
   }
 
   @Transactional
-  public String updateUser(String token, MultiValueMap<String, String> data) {
-    String email = jwtService.extractClaimGeneric("email", token);
+  public void updateUser(String token, MultiValueMap<String, String> data) {
+    String email = jwtService.extractUserEmail(token);
     String name = data.getFirst("name");
     String password = passwordEncoder.encode(data.getFirst("password"));
 
@@ -76,12 +87,10 @@ public class UserService {
 
     if (password != null) user.setPassword(password);
     if (name != null) user.setName(name);
-
-    return jwtService.generateAccessToken(user);
   }
 
   @Transactional
-  public Map<String, Object> authenticateUser(MultiValueMap<String, String> data) {
+  public AuthenticationResponse authenticateUser(MultiValueMap<String, String> data) {
     String email = data.getFirst("email");
     String password = data.getFirst("password");
 
@@ -99,13 +108,14 @@ public class UserService {
     long exp =
         jwtService.extractClaim(token, Claims::getExpiration).getTime()
             / 1000; // expiration time in seconds
-    body.put("access_token", token);
-    body.put("expires_at", exp);
-    body.put("refresh_token", refresh);
-    return body;
+    return AuthenticationResponse.builder()
+        .access_Token(token)
+        .expires_at(exp)
+        .refresh_token(refresh)
+        .build();
   }
 
-  public Map<String, Object> refreshAccessToken(String refreshToken) {
+  public RefreshResponse refreshAccessToken(String refreshToken) {
     String email = jwtService.extractUserEmail(refreshToken);
     User user =
         userRepository
@@ -118,9 +128,7 @@ public class UserService {
       long exp =
           jwtService.extractClaim(token, Claims::getExpiration).getTime()
               / 1000; // expiration time in seconds
-      body.put("access_token", token);
-      body.put("expires_at", exp);
-      return body;
+      return RefreshResponse.builder().access_Token(token).expires_at(exp).build();
     } else {
       throw new IllegalStateException("Refresh token is invalid");
     }

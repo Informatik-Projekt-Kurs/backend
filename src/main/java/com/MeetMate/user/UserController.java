@@ -1,8 +1,10 @@
 package com.MeetMate.user;
 
+import com.MeetMate.response.AuthenticationResponse;
+import com.MeetMate.response.GetResponse;
+import com.MeetMate.response.RefreshResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.Map;
 import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +21,7 @@ public class UserController {
 
   @GetMapping(path = "get")
   @ResponseBody
-  public ResponseEntity<User> getUser(@RequestHeader(name = "Authorization") String token) {
+  public ResponseEntity<GetResponse> getUser(@RequestHeader(name = "Authorization") String token) {
     token = token.substring(7);
     try {
       return ResponseEntity.ok(userService.getUserByEmail(token));
@@ -28,8 +30,6 @@ public class UserController {
       return ResponseEntity.notFound().header(enfe.getMessage()).build();
     }
   }
-
-  public void test(String token) {}
 
   @GetMapping(path = "getAll")
   @ResponseBody
@@ -54,12 +54,13 @@ public class UserController {
 
   @PutMapping(path = "update")
   @ResponseBody
-  public ResponseEntity<String> updateUser(
+  public ResponseEntity<?> updateUser(
       @RequestHeader(name = "Authorization") String token,
       @RequestParam MultiValueMap<String, String> data) {
     token = token.substring(7);
     try {
-      return ResponseEntity.ok(userService.updateUser(token, data));
+      userService.updateUser(token, data);
+      return ResponseEntity.ok().build();
 
     } catch (EntityNotFoundException enfe) {
       return ResponseEntity.notFound().header(enfe.getMessage()).build();
@@ -68,7 +69,7 @@ public class UserController {
 
   @PostMapping(path = "login")
   @ResponseBody
-  public ResponseEntity<Map<String, Object>> authenticateUser(
+  public ResponseEntity<AuthenticationResponse> authenticateUser(
       @RequestParam MultiValueMap<String, String> data) {
     try {
       return ResponseEntity.ok(userService.authenticateUser(data));
@@ -83,11 +84,12 @@ public class UserController {
 
   @PostMapping(path = "refresh")
   @ResponseBody
-  public ResponseEntity<Map<String, Object>> refreshAccessToken(
+  public ResponseEntity<RefreshResponse> refreshAccessToken(
       @RequestHeader(name = "Authorization") String refreshToken) {
     refreshToken = refreshToken.substring(7);
     try {
       return ResponseEntity.ok(userService.refreshAccessToken(refreshToken));
+
     } catch (IllegalStateException ise) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(ise.getMessage()).build();
     }

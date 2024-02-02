@@ -1,6 +1,6 @@
 package com.MeetMate.security;
 
-import com.MeetMate.Experiments.Experimentational;
+import com.MeetMate.experiments.Experimentational;
 import com.MeetMate.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
