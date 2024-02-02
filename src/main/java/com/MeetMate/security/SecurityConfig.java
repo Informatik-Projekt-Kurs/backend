@@ -15,28 +15,28 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final AuthenticationProvider authenticationProvider;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final AuthenticationProvider authenticationProvider;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(
-                        authorizeRequests ->
-                                authorizeRequests
-                                        .requestMatchers("/api/user/login", "/api/user/signup")
-//                                        .requestMatchers("/**")
-                                        .permitAll() // Whitelist
-                                        .anyRequest()
-                                        .authenticated() // Everything else should be authenticated
-                )
-                .sessionManagement(
-                        sessionManagement ->
-                                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    httpSecurity
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(
+            authorizeRequests ->
+                authorizeRequests
+                    .requestMatchers("/api/user/login", "/api/user/signup")
+                    //                                        .requestMatchers("/**")
+                    .permitAll() // Whitelist
+                    .anyRequest()
+                    .authenticated() // Everything else should be authenticated
+            )
+        .sessionManagement(
+            sessionManagement ->
+                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider)
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return httpSecurity.build();
-    }
+    return httpSecurity.build();
+  }
 }
