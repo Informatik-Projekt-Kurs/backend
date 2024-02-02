@@ -46,7 +46,8 @@ public class JwtService {
     if (user == null) throw new EntityNotFoundException("No user specified");
     return Jwts.builder()
         .setSubject(user.getEmail())
-        .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30)) // expires in 30 days
+        .setExpiration(
+            new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30)) // expires in 30 days
         .signWith(getSigningKey(), SignatureAlgorithm.HS256)
         .compact();
   }
