@@ -9,7 +9,7 @@ import lombok.Data;
 @Builder
 public class AuthenticationResponse {
 
-    String access_Token;
-    long expires_at;
-    String refresh_token;
+  String access_Token;
+  long expires_at;
+  String refresh_token;
 }

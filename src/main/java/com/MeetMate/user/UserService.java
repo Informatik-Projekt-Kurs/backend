@@ -9,7 +9,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
@@ -33,17 +32,18 @@ public class UserService {
 
     Optional<User> userOptional = userRepository.findUserByEmail(email);
 
-    User user = userRepository
-        .findUserByEmail(email)
-        .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+    User user =
+        userRepository
+            .findUserByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
     return GetResponse.builder()
-            .id(user.getId())
-            .name(user.getName())
-            .created_at(user.getCreatedAt())
-            .email(user.getEmail())
-            .role(user.getRole())
-            .build();
+        .id(user.getId())
+        .name(user.getName())
+        .created_at(user.getCreatedAt())
+        .email(user.getEmail())
+        .role(user.getRole())
+        .build();
   }
 
   public List<User> getAllUsers() {
@@ -106,12 +106,13 @@ public class UserService {
     String refresh = jwtService.generateRefreshToken(user);
     user.setRefreshToken(refresh);
     long exp =
-        jwtService.extractClaim(token, Claims::getExpiration).getTime() / 1000; // expiration time in seconds
-    return  AuthenticationResponse.builder()
-            .access_Token(token)
-            .expires_at(exp)
-            .refresh_token(refresh)
-            .build();
+        jwtService.extractClaim(token, Claims::getExpiration).getTime()
+            / 1000; // expiration time in seconds
+    return AuthenticationResponse.builder()
+        .access_Token(token)
+        .expires_at(exp)
+        .refresh_token(refresh)
+        .build();
   }
 
   public RefreshResponse refreshAccessToken(String refreshToken) {
@@ -125,11 +126,9 @@ public class UserService {
       HashMap<String, Object> body = new HashMap<>();
       String token = jwtService.generateAccessToken(user);
       long exp =
-          jwtService.extractClaim(token, Claims::getExpiration).getTime() / 1000; // expiration time in seconds
-      return RefreshResponse.builder()
-              .access_Token(token)
-              .expires_at(exp)
-              .build();
+          jwtService.extractClaim(token, Claims::getExpiration).getTime()
+              / 1000; // expiration time in seconds
+      return RefreshResponse.builder().access_Token(token).expires_at(exp).build();
     } else {
       throw new IllegalStateException("Refresh token is invalid");
     }

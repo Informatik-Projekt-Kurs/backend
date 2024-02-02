@@ -9,6 +9,6 @@ import lombok.Data;
 @Builder
 public class RefreshResponse {
 
-    String access_Token;
-    long expires_at;
+  String access_Token;
+  long expires_at;
 }
