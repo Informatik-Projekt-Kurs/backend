@@ -1,20 +1,18 @@
 package com.MeetMate.user;
 
-import com.MeetMate.Experiments.Experimentational;
+import com.MeetMate.experiments.Experimentational;
 import com.MeetMate.roles.Role;
 import jakarta.persistence.*;
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
@@ -38,10 +36,6 @@ public class User implements UserDetails {
 
   // Last login
   // bool verified
-  @Transient
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.NONE)
-  private int age;
 
   public User() {}
 
