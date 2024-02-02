@@ -40,15 +40,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // beginIndex is 7 bc "Bearer " is 7
     jwt = authHeader.substring(7);
     userEmail = jwtService.extractUserEmail(jwt);
-    // Object i = jwtService.extractClaimCool(jwt,"age");
+
     if (userEmail != null
         && SecurityContextHolder.getContext().getAuthentication()
             == null) { // check f if user is already authenticated
       UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
       if (jwtService.isTokenValid(jwt, userDetails)) {
         UsernamePasswordAuthenticationToken authToken =
             new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
+
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
       }

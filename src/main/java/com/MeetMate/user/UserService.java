@@ -127,7 +127,7 @@ public class UserService {
   }
 
   public void deleteUser(String token) {
-    String email = jwtService.extractClaimGeneric("email", token);
+    String email = jwtService.extractUserEmail(token);
 
     User user =
         userRepository

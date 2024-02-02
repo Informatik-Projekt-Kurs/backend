@@ -19,7 +19,8 @@ public class UserController {
 
   @GetMapping(path = "get")
   @ResponseBody
-  public ResponseEntity<User> getUser(@RequestParam String token) {
+  public ResponseEntity<User> getUser(@RequestHeader(name = "Authorization") String token) {
+    token = token.substring(7);
     try {
       return ResponseEntity.ok(userService.getUserByEmail(token));
 
@@ -27,6 +28,8 @@ public class UserController {
       return ResponseEntity.notFound().header(enfe.getMessage()).build();
     }
   }
+
+  public void test(String token) {}
 
   @GetMapping(path = "getAll")
   @ResponseBody
@@ -52,7 +55,9 @@ public class UserController {
   @PutMapping(path = "update")
   @ResponseBody
   public ResponseEntity<String> updateUser(
-      @RequestParam String token, @RequestParam MultiValueMap<String, String> data) {
+      @RequestHeader(name = "Authorization") String token,
+      @RequestParam MultiValueMap<String, String> data) {
+    token = token.substring(7);
     try {
       return ResponseEntity.ok(userService.updateUser(token, data));
 
@@ -78,7 +83,9 @@ public class UserController {
 
   @PostMapping(path = "refresh")
   @ResponseBody
-  public ResponseEntity<Map<String, Object>> refreshAccessToken(@RequestParam String refreshToken) {
+  public ResponseEntity<Map<String, Object>> refreshAccessToken(
+      @RequestHeader(name = "Authorization") String refreshToken) {
+    refreshToken = refreshToken.substring(7);
     try {
       return ResponseEntity.ok(userService.refreshAccessToken(refreshToken));
     } catch (IllegalStateException ise) {
@@ -88,7 +95,8 @@ public class UserController {
 
   @DeleteMapping(path = "delete")
   @ResponseBody
-  public ResponseEntity<?> deleteUser(@RequestParam String token) {
+  public ResponseEntity<?> deleteUser(@RequestHeader(name = "Authorization") String token) {
+    token = token.substring(7);
     try {
       userService.deleteUser(token);
       return ResponseEntity.noContent().build();

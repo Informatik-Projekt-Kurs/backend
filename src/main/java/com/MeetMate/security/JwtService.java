@@ -34,7 +34,7 @@ public class JwtService {
   public String generateAccessToken(User user) throws EntityNotFoundException {
     if (user == null) throw new EntityNotFoundException("No user specified");
     return Jwts.builder()
-        //                .setClaims(user.generateMap())
+        .setClaims(user.generateMap())
         .setSubject(user.getEmail())
         .setIssuedAt(new Date(System.currentTimeMillis()))
         .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5)) // expires in 5 minutes
