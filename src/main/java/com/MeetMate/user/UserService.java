@@ -98,9 +98,9 @@ public class UserService {
     user.setRefreshToken(refresh);
     long exp =
         jwtService.extractClaim(token, Claims::getExpiration).getTime()
-            - System.currentTimeMillis();
+            / 1000; // expiration time in seconds
     body.put("access_token", token);
-    body.put("expires_in", exp);
+    body.put("expires_at", exp);
     body.put("refresh_token", refresh);
     return body;
   }
@@ -117,9 +117,9 @@ public class UserService {
       String token = jwtService.generateAccessToken(user);
       long exp =
           jwtService.extractClaim(token, Claims::getExpiration).getTime()
-              - System.currentTimeMillis();
+              / 1000; // expiration time in seconds
       body.put("access_token", token);
-      body.put("expires_in", exp);
+      body.put("expires_at", exp);
       return body;
     } else {
       throw new IllegalStateException("Refresh token is invalid");
