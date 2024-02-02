@@ -1,9 +1,12 @@
 package com.MeetMate.user;
 
 import com.MeetMate.security.JwtService;
+import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +26,7 @@ public class UserService {
   private final AuthenticationManager authenticationManager;
 
   public User getUserByEmail(String token) {
-    String email = jwtService.extractClaimGeneric("email", token);
+    String email = jwtService.extractUserEmail(token);
 
     Optional<User> userOptional = userRepository.findUserByEmail(email);
 
@@ -55,8 +58,9 @@ public class UserService {
       }
 
       userRepository.save(user);
+    } else {
+      throw new IllegalArgumentException("Required argument is missing");
     }
-    throw new IllegalArgumentException("Required argument is missing");
   }
 
   @Transactional
@@ -73,13 +77,13 @@ public class UserService {
     if (password != null) user.setPassword(password);
     if (name != null) user.setName(name);
 
-    return jwtService.generateToken(null, user);
+    return jwtService.generateAccessToken(user);
   }
 
-  public String authenticateUser(String token) {
-    String email = jwtService.extractUserEmail(token);
-    String password =
-        jwtService.extractClaim(token, Claims -> Claims.get("password", String.class));
+  @Transactional
+  public Map<String, Object> authenticateUser(MultiValueMap<String, String> data) {
+    String email = data.getFirst("email");
+    String password = data.getFirst("password");
 
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 
@@ -88,7 +92,38 @@ public class UserService {
             .findUserByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-    return jwtService.generateToken(null, user);
+    HashMap<String, Object> body = new HashMap<>();
+    String token = jwtService.generateAccessToken(user);
+    String refresh = jwtService.generateRefreshToken(user);
+    user.setRefreshToken(refresh);
+    long exp =
+        jwtService.extractClaim(token, Claims::getExpiration).getTime()
+            - System.currentTimeMillis();
+    body.put("access_token", token);
+    body.put("expires_in", exp);
+    body.put("refresh_token", refresh);
+    return body;
+  }
+
+  public Map<String, Object> refreshAccessToken(String refreshToken) {
+    String email = jwtService.extractUserEmail(refreshToken);
+    User user =
+        userRepository
+            .findUserByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+
+    if (refreshToken.equals(user.getRefreshToken())) {
+      HashMap<String, Object> body = new HashMap<>();
+      String token = jwtService.generateAccessToken(user);
+      long exp =
+          jwtService.extractClaim(token, Claims::getExpiration).getTime()
+              - System.currentTimeMillis();
+      body.put("access_token", token);
+      body.put("expires_in", exp);
+      return body;
+    } else {
+      throw new IllegalStateException("Refresh token is invalid");
+    }
   }
 
   public void deleteUser(String token) {

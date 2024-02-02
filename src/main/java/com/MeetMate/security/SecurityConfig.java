@@ -25,6 +25,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorizeRequests ->
                 authorizeRequests
+                    //                                        .requestMatchers("/api/user/login",
+                    // "/api/user/signup")
                     .requestMatchers("/**")
                     .permitAll() // Whitelist
                     .anyRequest()

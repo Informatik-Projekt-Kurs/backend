@@ -5,7 +5,9 @@ import com.MeetMate.roles.Role;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -19,7 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Data
 public class User implements UserDetails {
   @Id
-  @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 1)
+  @SequenceGenerator(name = "user_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
   private Long id;
 
@@ -29,12 +31,12 @@ public class User implements UserDetails {
 
   private String email;
   private String password;
+  private String refreshToken;
 
   @Enumerated(EnumType.STRING)
   private Role role;
 
   // Last login
-  // (refresh token)
   // bool verified
   @Transient
   @Getter(AccessLevel.NONE)
@@ -64,6 +66,14 @@ public class User implements UserDetails {
   public User(String email, String password) {
     this.email = email;
     this.password = password;
+  }
+
+  public Map<String, Object> generateMap() {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put("name", this.getName());
+    map.put("password", this.getPassword());
+    map.put("role", this.getRole());
+    return map;
   }
 
   // List of Roles

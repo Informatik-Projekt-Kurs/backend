@@ -2,6 +2,7 @@ package com.MeetMate.user;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Map;
 import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "api/test/user")
+@RequestMapping(path = "api/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -60,14 +61,28 @@ public class UserController {
     }
   }
 
-  @PostMapping(path = "auth")
+  @PostMapping(path = "login")
   @ResponseBody
-  public ResponseEntity<String> authenticateUser(@RequestParam String token) {
+  public ResponseEntity<Map<String, Object>> authenticateUser(
+      @RequestParam MultiValueMap<String, String> data) {
     try {
-      return ResponseEntity.ok(userService.authenticateUser(token));
+      return ResponseEntity.ok(userService.authenticateUser(data));
 
     } catch (EntityNotFoundException enfe) {
       return ResponseEntity.notFound().header(enfe.getMessage()).build();
+
+    } catch (IllegalArgumentException iae) {
+      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header(iae.getMessage()).build();
+    }
+  }
+
+  @PostMapping(path = "refresh")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> refreshAccessToken(@RequestParam String refreshToken) {
+    try {
+      return ResponseEntity.ok(userService.refreshAccessToken(refreshToken));
+    } catch (IllegalStateException ise) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(ise.getMessage()).build();
     }
   }
 
