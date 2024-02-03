@@ -1,127 +1,107 @@
 package com.MeetMate.user;
 
+import com.MeetMate.experiments.Experimentational;
+import com.MeetMate.roles.Role;
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.Period;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
-public class User {
-    @Id
-    @SequenceGenerator(
-            name = "user_sequence",
-            sequenceName = "user_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "user_sequence"
-    )
-    private Long id;
-    private String name;
-    private LocalDate birthday;
-    private LocalDate createdAt;
-    private String email;
-    private String password;
-    //enum Rolle
-    //Last login
-    //(refresh token)
-    //bool verified
+@Data
+public class User implements UserDetails {
+  @Id
+  @SequenceGenerator(name = "user_sequence", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
+  private Long id;
 
-    //No need for column in database
-    @Transient
-    private int age;
+  private String name;
 
-    public User() {
-    }
+  private LocalDate createdAt;
 
-    public User(Long id, String name, LocalDate birthday, String email, String password) {
-        this.id = id;
-        this.name = name;
-        this.birthday = birthday;
-        this.email = email;
-        this.password = password;
-        this.createdAt = LocalDate.now();
-        if (birthday == null) {
-            birthday = LocalDate.of(1970, Month.JANUARY, 1);
-        }
-    }
+  private String email;
+  private String password;
+  private String refreshToken;
 
-    public User(String name, LocalDate birthday, String email, String password) {
-        this.name = name;
-        this.birthday = birthday;
-        this.email = email;
-        this.password = password;
-        this.createdAt = LocalDate.now();
-    }
+  @Enumerated(EnumType.STRING)
+  private Role role;
 
-    public User(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
+  // Last login
+  // bool verified
 
-    public Long getId() {
-        return id;
-    }
+  public User() {}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  @Experimentational
+  public User(Long id, String name, String email, String password) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.createdAt = LocalDate.now();
+  }
 
-    public String getName() {
-        return name;
-    }
+  public User(String name, String email, String password) {
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.createdAt = LocalDate.now();
+    role = Role.CLIENT;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  @Experimentational
+  public User(String email, String password) {
+    this.email = email;
+    this.password = password;
+  }
 
-    public LocalDate getBirthday() {
-        if (this.birthday == null) birthday = LocalDate.EPOCH;
-        return birthday;
-    }
+  public Map<String, Object> generateMap() {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put("name", this.getName());
+    map.put("password", this.getPassword());
+    map.put("role", this.getRole());
+    return map;
+  }
 
-    public void setBirthday(LocalDate birthday) {
-        this.birthday = birthday;
-    }
+  // List of Roles
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority(role.name()));
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  @Override
+  public String getUsername() {
+    return email;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  @Override
+  public String getPassword() {
+    return password;
+  }
 
-    public String getPassword() {
-        return password;
-    }
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
+  }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
 
-    public int getAge() {
-        return Period.between(getBirthday(), LocalDate.now()).getYears();
-    }
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
 
-    public LocalDate getCreatedAt() {
-        return createdAt;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", birthday=" + birthday +
-                ", createdAt=" + createdAt +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", age=" + age +
-                '}';
-    }
-
+  @Override
+  public boolean isEnabled() {
+    return true;
+  }
 }
