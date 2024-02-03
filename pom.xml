@@ -20,6 +20,17 @@
 		<maven.compiler.release>17</maven.compiler.release>
        		<maven.compiler.verbose>true</maven.compiler.verbose> 
 	</properties>
+
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>backend</id>
+			<name>MeetMate Backend</name>
+			<url>https://github.com/Informatik-Projekt-Kurs/backend</url>
+			<layout>default</layout>
+		</repository>
+	</distributionManagement>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
