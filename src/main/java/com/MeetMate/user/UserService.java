@@ -6,16 +6,15 @@ import com.MeetMate.security.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
+import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
-
-import javax.naming.NameAlreadyBoundException;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,19 +53,17 @@ public class UserService {
     String name = data.getFirst("name");
     String password = data.getFirst("password");
 
-    if (email == null || email.isEmpty()
-        || password == null || password.isEmpty()
-        || name == null || name.isEmpty())
-      throw new IllegalArgumentException("Required argument is missing");
+    if (email == null
+        || email.isEmpty()
+        || password == null
+        || password.isEmpty()
+        || name == null
+        || name.isEmpty()) throw new IllegalArgumentException("Required argument is missing");
 
     if (userRepository.findUserByEmail(email).isPresent())
       throw new NameAlreadyBoundException("Email taken");
 
-    userRepository.save(
-        new User(
-            name,
-            email,
-            passwordEncoder.encode(password)));
+    userRepository.save(new User(name, email, passwordEncoder.encode(password)));
   }
 
   @Transactional
@@ -100,7 +97,8 @@ public class UserService {
     String refresh = jwtService.generateRefreshToken(user);
     user.setRefreshToken(refresh);
     long exp =
-        jwtService.extractClaim(token, Claims::getExpiration).getTime() / 1000; // expiration time in seconds
+        jwtService.extractClaim(token, Claims::getExpiration).getTime()
+            / 1000; // expiration time in seconds
 
     return AuthResponse.builder()
         .access_Token(token)
@@ -123,7 +121,8 @@ public class UserService {
     String refresh = jwtService.generateRefreshToken(user);
     user.setRefreshToken(refresh);
     long exp =
-        jwtService.extractClaim(token, Claims::getExpiration).getTime() / 1000; // expiration time in seconds
+        jwtService.extractClaim(token, Claims::getExpiration).getTime()
+            / 1000; // expiration time in seconds
 
     return AuthResponse.builder()
         .access_Token(token)

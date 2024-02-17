@@ -3,10 +3,8 @@ package com.MeetMate.user;
 import com.MeetMate.response.AuthResponse;
 import com.MeetMate.response.GetResponse;
 import jakarta.persistence.EntityNotFoundException;
-
 import java.util.List;
 import javax.naming.NameAlreadyBoundException;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
