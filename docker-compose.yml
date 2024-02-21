@@ -1,0 +1,44 @@
+version: '3'
+services:
+  meet-mate:
+    image: openjdk:20
+    working_dir: /app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./target/MeetMate.jar:/app/app.jar
+      - ./pom.xml:/app/pom.xml
+      - ./src/main/resources/application.properties:/app/config/application.properties
+      - ./libs:/app/libs
+    command: [ "java", "-jar", "app.jar" ]
+    depends_on:
+      - postgres
+    environment:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: 1234
+#    networks:
+#      meet-mate_nw:
+#        ipv4_address: 192.168.69.1
+
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: test
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+#    networks:
+#      meet-mate_nw:
+#        ipv4_address: 13.37.69.1
+#
+#networks:
+#  meet-mate_nw:
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: "192.168.69.0/24"
