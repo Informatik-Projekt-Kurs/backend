@@ -1,8 +1,7 @@
 package com.MeetMate.user;
 
-import com.MeetMate.response.AuthenticationResponse;
+import com.MeetMate.response.AuthResponse;
 import com.MeetMate.response.GetResponse;
-import com.MeetMate.response.RefreshResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import javax.naming.NameAlreadyBoundException;
@@ -69,7 +68,7 @@ public class UserController {
 
   @PostMapping(path = "login")
   @ResponseBody
-  public ResponseEntity<AuthenticationResponse> authenticateUser(
+  public ResponseEntity<AuthResponse> authenticateUser(
       @RequestParam MultiValueMap<String, String> data) {
     try {
       return ResponseEntity.ok(userService.authenticateUser(data));
@@ -84,7 +83,7 @@ public class UserController {
 
   @PostMapping(path = "refresh")
   @ResponseBody
-  public ResponseEntity<RefreshResponse> refreshAccessToken(
+  public ResponseEntity<AuthResponse> refreshAccessToken(
       @RequestHeader(name = "Authorization") String refreshToken) {
     refreshToken = refreshToken.substring(7);
     try {

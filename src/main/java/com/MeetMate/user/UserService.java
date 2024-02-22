@@ -1,13 +1,11 @@
 package com.MeetMate.user;
 
-import com.MeetMate.response.AuthenticationResponse;
+import com.MeetMate.response.AuthResponse;
 import com.MeetMate.response.GetResponse;
-import com.MeetMate.response.RefreshResponse;
 import com.MeetMate.security.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import javax.naming.NameAlreadyBoundException;
@@ -55,23 +53,17 @@ public class UserService {
     String name = data.getFirst("name");
     String password = data.getFirst("password");
 
-    User user = new User(name, email, passwordEncoder.encode(password));
+    if (email == null
+        || email.isEmpty()
+        || password == null
+        || password.isEmpty()
+        || name == null
+        || name.isEmpty()) throw new IllegalArgumentException("Required argument is missing");
 
-    if (email != null
-        && !email.isEmpty()
-        && password != null
-        && !password.isEmpty()
-        && name != null
-        && !name.isEmpty()) {
-      Optional<User> userOptional = userRepository.findUserByEmail(email);
-      if (userOptional.isPresent()) {
-        throw new NameAlreadyBoundException("Email taken");
-      }
+    if (userRepository.findUserByEmail(email).isPresent())
+      throw new NameAlreadyBoundException("Email taken");
 
-      userRepository.save(user);
-    } else {
-      throw new IllegalArgumentException("Required argument is missing");
-    }
+    userRepository.save(new User(name, email, passwordEncoder.encode(password)));
   }
 
   @Transactional
@@ -90,7 +82,7 @@ public class UserService {
   }
 
   @Transactional
-  public AuthenticationResponse authenticateUser(MultiValueMap<String, String> data) {
+  public AuthResponse authenticateUser(MultiValueMap<String, String> data) {
     String email = data.getFirst("email");
     String password = data.getFirst("password");
 
@@ -101,37 +93,42 @@ public class UserService {
             .findUserByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-    HashMap<String, Object> body = new HashMap<>();
     String token = jwtService.generateAccessToken(user);
     String refresh = jwtService.generateRefreshToken(user);
     user.setRefreshToken(refresh);
     long exp =
         jwtService.extractClaim(token, Claims::getExpiration).getTime()
             / 1000; // expiration time in seconds
-    return AuthenticationResponse.builder()
+
+    return AuthResponse.builder()
         .access_Token(token)
         .expires_at(exp)
-        .refresh_token(refresh)
+        .refresh_Token(refresh)
         .build();
   }
 
-  public RefreshResponse refreshAccessToken(String refreshToken) {
+  public AuthResponse refreshAccessToken(String refreshToken) {
     String email = jwtService.extractUserEmail(refreshToken);
     User user =
         userRepository
             .findUserByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-    if (refreshToken.equals(user.getRefreshToken())) {
-      HashMap<String, Object> body = new HashMap<>();
-      String token = jwtService.generateAccessToken(user);
-      long exp =
-          jwtService.extractClaim(token, Claims::getExpiration).getTime()
-              / 1000; // expiration time in seconds
-      return RefreshResponse.builder().access_Token(token).expires_at(exp).build();
-    } else {
+    if (!refreshToken.equals(user.getRefreshToken()))
       throw new IllegalStateException("Refresh token is invalid");
-    }
+
+    String token = jwtService.generateAccessToken(user);
+    String refresh = jwtService.generateRefreshToken(user);
+    user.setRefreshToken(refresh);
+    long exp =
+        jwtService.extractClaim(token, Claims::getExpiration).getTime()
+            / 1000; // expiration time in seconds
+
+    return AuthResponse.builder()
+        .access_Token(token)
+        .expires_at(exp)
+        .refresh_Token(refresh)
+        .build();
   }
 
   public void deleteUser(String token) {
@@ -142,10 +139,8 @@ public class UserService {
             .findUserByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
     long userId = user.getId();
-    boolean exists = userRepository.existsById(userId);
-    if (!exists) {
+    if (!userRepository.existsById(userId))
       throw new EntityNotFoundException("User does not exist");
-    }
 
     userRepository.deleteById(userId);
   }

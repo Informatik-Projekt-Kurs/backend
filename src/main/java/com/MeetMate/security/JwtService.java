@@ -54,7 +54,7 @@ public class JwtService {
 
   // Claims::getSubject
   public String extractUserEmail(String token) {
-    return extractClaim(token, Claims -> Claims.getSubject());
+    return extractClaim(token, Claims::getSubject);
   }
 
   @Experimentational
