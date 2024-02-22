@@ -3,8 +3,10 @@ package com.MeetMate.user;
 import com.MeetMate.response.AuthResponse;
 import com.MeetMate.response.GetResponse;
 import jakarta.persistence.EntityNotFoundException;
+
 import java.util.List;
 import javax.naming.NameAlreadyBoundException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,15 +27,25 @@ public class UserController {
     try {
       return ResponseEntity.ok(userService.getUserByEmail(token));
 
-    } catch (EntityNotFoundException enfe) {
-      return ResponseEntity.notFound().header(enfe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.notFound().header(t.getMessage()).build();
+
+      return ResponseEntity.internalServerError().header(t.getMessage()).build();
     }
   }
 
   @GetMapping(path = "getAll")
   @ResponseBody
   public ResponseEntity<List<User>> getAllUsers() {
-    return ResponseEntity.ok(userService.getAllUsers());
+    try {
+      return ResponseEntity.ok(userService.getAllUsers());
+
+    } catch (Throwable t) {
+      return ResponseEntity.internalServerError().header(t.getMessage()).build();
+    }
   }
 
   @PostMapping(path = "signup")
@@ -43,11 +55,16 @@ public class UserController {
       userService.registerNewUser(data);
       return ResponseEntity.ok().build();
 
-    } catch (NameAlreadyBoundException nabe) {
-      return ResponseEntity.status(HttpStatus.CONFLICT).header(nabe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
 
-    } catch (IllegalArgumentException iae) {
-      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header(iae.getMessage()).build();
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header(t.getMessage()).build();
+
+      if (tc == NameAlreadyBoundException.class)
+        return ResponseEntity.status(HttpStatus.CONFLICT).header(t.getMessage()).build();
+
+      return ResponseEntity.internalServerError().header(t.getMessage()).build();
     }
   }
 
@@ -61,8 +78,13 @@ public class UserController {
       userService.updateUser(token, data);
       return ResponseEntity.ok().build();
 
-    } catch (EntityNotFoundException enfe) {
-      return ResponseEntity.notFound().header(enfe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.notFound().header(t.getMessage()).build();
+
+      return ResponseEntity.internalServerError().header(t.getMessage()).build();
     }
   }
 
@@ -73,11 +95,13 @@ public class UserController {
     try {
       return ResponseEntity.ok(userService.authenticateUser(data));
 
-    } catch (EntityNotFoundException enfe) {
-      return ResponseEntity.notFound().header(enfe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+      System.out.println(tc.getName());
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.notFound().header(t.getMessage()).build();
 
-    } catch (IllegalArgumentException iae) {
-      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header(iae.getMessage()).build();
+      return ResponseEntity.internalServerError().header(t.getMessage()).build();
     }
   }
 
@@ -89,8 +113,16 @@ public class UserController {
     try {
       return ResponseEntity.ok(userService.refreshAccessToken(refreshToken));
 
-    } catch (IllegalStateException ise) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(ise.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.notFound().header(t.getMessage()).build();
+
+      if (tc == IllegalStateException.class)
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(t.getMessage()).build();
+
+      return ResponseEntity.internalServerError().header(t.getMessage()).build();
     }
   }
 
@@ -102,8 +134,13 @@ public class UserController {
       userService.deleteUser(token);
       return ResponseEntity.noContent().build();
 
-    } catch (EntityNotFoundException enfe) {
-      return ResponseEntity.notFound().header(enfe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.notFound().header(t.getMessage()).build();
+
+      return ResponseEntity.internalServerError().header(t.getMessage()).build();
     }
   }
 }

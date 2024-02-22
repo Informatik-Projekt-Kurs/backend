@@ -5,7 +5,7 @@ target/
 !**/src/test/**/target/
 
 ### Docker Compose ###
-data
+/data/
 
 ### STS ###
 .apt_generated
