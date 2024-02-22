@@ -5,11 +5,14 @@ import com.MeetMate.response.GetResponse;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
+import javax.naming.AuthenticationException;
 import javax.naming.NameAlreadyBoundException;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +25,7 @@ public class UserController {
 
   @GetMapping(path = "get")
   @ResponseBody
-  public ResponseEntity<GetResponse> getUser(@RequestHeader(name = "Authorization") String token) {
+  public ResponseEntity<?> getUser(@RequestHeader(name = "Authorization") String token) {
     token = token.substring(7);
     try {
       return ResponseEntity.ok(userService.getUserByEmail(token));
@@ -31,20 +34,20 @@ public class UserController {
       Class<? extends Throwable> tc = t.getClass();
 
       if (tc == EntityNotFoundException.class)
-        return ResponseEntity.notFound().header(t.getMessage()).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
-      return ResponseEntity.internalServerError().header(t.getMessage()).build();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
 
   @GetMapping(path = "getAll")
   @ResponseBody
-  public ResponseEntity<List<User>> getAllUsers() {
+  public ResponseEntity<?> getAllUsers() {
     try {
       return ResponseEntity.ok(userService.getAllUsers());
 
     } catch (Throwable t) {
-      return ResponseEntity.internalServerError().header(t.getMessage()).build();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
 
@@ -59,12 +62,12 @@ public class UserController {
       Class<? extends Throwable> tc = t.getClass();
 
       if (tc == IllegalArgumentException.class)
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header(t.getMessage()).build();
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("message: " + t.getMessage());
 
       if (tc == NameAlreadyBoundException.class)
-        return ResponseEntity.status(HttpStatus.CONFLICT).header(t.getMessage()).build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).header("message: ", t.getMessage()).build();
 
-      return ResponseEntity.internalServerError().header(t.getMessage()).build();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
 
@@ -82,32 +85,36 @@ public class UserController {
       Class<? extends Throwable> tc = t.getClass();
 
       if (tc == EntityNotFoundException.class)
-        return ResponseEntity.notFound().header(t.getMessage()).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
-      return ResponseEntity.internalServerError().header(t.getMessage()).build();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
 
   @PostMapping(path = "login")
   @ResponseBody
-  public ResponseEntity<AuthResponse> authenticateUser(
+  public ResponseEntity<?> authenticateUser(
       @RequestParam MultiValueMap<String, String> data) {
     try {
       return ResponseEntity.ok(userService.authenticateUser(data));
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
-      System.out.println(tc.getName());
-      if (tc == EntityNotFoundException.class)
-        return ResponseEntity.notFound().header(t.getMessage()).build();
 
-      return ResponseEntity.internalServerError().header(t.getMessage()).build();
+      if (tc == InternalAuthenticationServiceException.class
+          || tc == BadCredentialsException.class)
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("message: " + t.getMessage());
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
 
   @PostMapping(path = "refresh")
   @ResponseBody
-  public ResponseEntity<AuthResponse> refreshAccessToken(
+  public ResponseEntity<?> refreshAccessToken(
       @RequestHeader(name = "Authorization") String refreshToken) {
     refreshToken = refreshToken.substring(7);
     try {
@@ -117,12 +124,12 @@ public class UserController {
       Class<? extends Throwable> tc = t.getClass();
 
       if (tc == EntityNotFoundException.class)
-        return ResponseEntity.notFound().header(t.getMessage()).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
       if (tc == IllegalStateException.class)
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(t.getMessage()).build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("message: " + t.getMessage());
 
-      return ResponseEntity.internalServerError().header(t.getMessage()).build();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
 
@@ -138,9 +145,9 @@ public class UserController {
       Class<? extends Throwable> tc = t.getClass();
 
       if (tc == EntityNotFoundException.class)
-        return ResponseEntity.notFound().header(t.getMessage()).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
-      return ResponseEntity.internalServerError().header(t.getMessage()).build();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
 }
