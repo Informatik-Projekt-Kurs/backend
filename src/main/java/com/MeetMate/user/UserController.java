@@ -1,13 +1,12 @@
 package com.MeetMate.user;
 
-import com.MeetMate.response.AuthResponse;
-import com.MeetMate.response.GetResponse;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
 import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,20 +19,32 @@ public class UserController {
 
   @GetMapping(path = "get")
   @ResponseBody
-  public ResponseEntity<GetResponse> getUser(@RequestHeader(name = "Authorization") String token) {
+  public ResponseEntity<?> getUser(@RequestHeader(name = "Authorization") String token) {
     token = token.substring(7);
     try {
       return ResponseEntity.ok(userService.getUserByEmail(token));
 
-    } catch (EntityNotFoundException enfe) {
-      return ResponseEntity.notFound().header(enfe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
     }
   }
 
   @GetMapping(path = "getAll")
   @ResponseBody
-  public ResponseEntity<List<User>> getAllUsers() {
-    return ResponseEntity.ok(userService.getAllUsers());
+  public ResponseEntity<?> getAllUsers() {
+    try {
+      return ResponseEntity.ok(userService.getAllUsers());
+
+    } catch (Throwable t) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
+    }
   }
 
   @PostMapping(path = "signup")
@@ -43,11 +54,19 @@ public class UserController {
       userService.registerNewUser(data);
       return ResponseEntity.ok().build();
 
-    } catch (NameAlreadyBoundException nabe) {
-      return ResponseEntity.status(HttpStatus.CONFLICT).header(nabe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
 
-    } catch (IllegalArgumentException iae) {
-      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header(iae.getMessage()).build();
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("message: " + t.getMessage());
+
+      if (tc == NameAlreadyBoundException.class)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .header("message: ", t.getMessage())
+            .build();
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
     }
   }
 
@@ -61,36 +80,56 @@ public class UserController {
       userService.updateUser(token, data);
       return ResponseEntity.ok().build();
 
-    } catch (EntityNotFoundException enfe) {
-      return ResponseEntity.notFound().header(enfe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
     }
   }
 
   @PostMapping(path = "login")
   @ResponseBody
-  public ResponseEntity<AuthResponse> authenticateUser(
-      @RequestParam MultiValueMap<String, String> data) {
+  public ResponseEntity<?> authenticateUser(@RequestParam MultiValueMap<String, String> data) {
     try {
       return ResponseEntity.ok(userService.authenticateUser(data));
 
-    } catch (EntityNotFoundException enfe) {
-      return ResponseEntity.notFound().header(enfe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
 
-    } catch (IllegalArgumentException iae) {
-      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).header(iae.getMessage()).build();
+      if (tc == InternalAuthenticationServiceException.class || tc == BadCredentialsException.class)
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("message: " + t.getMessage());
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
     }
   }
 
   @PostMapping(path = "refresh")
   @ResponseBody
-  public ResponseEntity<AuthResponse> refreshAccessToken(
+  public ResponseEntity<?> refreshAccessToken(
       @RequestHeader(name = "Authorization") String refreshToken) {
     refreshToken = refreshToken.substring(7);
     try {
       return ResponseEntity.ok(userService.refreshAccessToken(refreshToken));
 
-    } catch (IllegalStateException ise) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(ise.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalStateException.class)
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
     }
   }
 
@@ -102,8 +141,14 @@ public class UserController {
       userService.deleteUser(token);
       return ResponseEntity.noContent().build();
 
-    } catch (EntityNotFoundException enfe) {
-      return ResponseEntity.notFound().header(enfe.getMessage()).build();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
     }
   }
 }
