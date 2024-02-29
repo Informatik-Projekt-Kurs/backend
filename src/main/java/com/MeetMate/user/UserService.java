@@ -123,10 +123,7 @@ public class UserService {
         jwtService.extractClaim(token, Claims::getExpiration).getTime()
             / 1000; // expiration time in seconds
 
-    return RefreshResponse.builder()
-        .access_Token(token)
-        .expires_at(exp)
-        .build();
+    return RefreshResponse.builder().access_Token(token).expires_at(exp).build();
   }
 
   public void deleteUser(String token) {
