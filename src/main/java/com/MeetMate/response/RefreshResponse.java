@@ -7,9 +7,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class AuthResponse {
+public class RefreshResponse {
 
   String access_Token;
   long expires_at;
-  String refresh_Token;
 }

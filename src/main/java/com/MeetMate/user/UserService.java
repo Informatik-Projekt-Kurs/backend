@@ -1,7 +1,8 @@
 package com.MeetMate.user;
 
-import com.MeetMate.response.AuthResponse;
+import com.MeetMate.response.AuthenticationResponse;
 import com.MeetMate.response.GetResponse;
+import com.MeetMate.response.RefreshResponse;
 import com.MeetMate.security.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
@@ -82,7 +83,7 @@ public class UserService {
   }
 
   @Transactional
-  public AuthResponse authenticateUser(MultiValueMap<String, String> data) {
+  public AuthenticationResponse authenticateUser(MultiValueMap<String, String> data) {
     String email = data.getFirst("email");
     String password = data.getFirst("password");
 
@@ -100,14 +101,14 @@ public class UserService {
         jwtService.extractClaim(token, Claims::getExpiration).getTime()
             / 1000; // expiration time in seconds
 
-    return AuthResponse.builder()
+    return AuthenticationResponse.builder()
         .access_Token(token)
         .expires_at(exp)
         .refresh_Token(refresh)
         .build();
   }
 
-  public AuthResponse refreshAccessToken(String refreshToken) {
+  public RefreshResponse refreshAccessToken(String refreshToken) {
     String email = jwtService.extractUserEmail(refreshToken);
     User user =
         userRepository
@@ -118,17 +119,11 @@ public class UserService {
       throw new IllegalStateException("Refresh token is invalid");
 
     String token = jwtService.generateAccessToken(user);
-    String refresh = jwtService.generateRefreshToken(user);
-    user.setRefreshToken(refresh);
     long exp =
         jwtService.extractClaim(token, Claims::getExpiration).getTime()
             / 1000; // expiration time in seconds
 
-    return AuthResponse.builder()
-        .access_Token(token)
-        .expires_at(exp)
-        .refresh_Token(refresh)
-        .build();
+    return RefreshResponse.builder().access_Token(token).expires_at(exp).build();
   }
 
   public void deleteUser(String token) {
