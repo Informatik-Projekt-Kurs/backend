@@ -8,18 +8,16 @@ services:
     volumes:
       - ./target/MeetMate.jar:/app/app.jar
       - ./pom.xml:/app/pom.xml
-      - ./src/main/resources/application.properties:/app/config/application.properties
+      - ./src/main/resources/application.yml:/app/config/application.yml
       - ./libs:/app/libs
     command: [ "java", "-jar", "app.jar" ]
     depends_on:
       - postgres
+      - java
     environment:
         SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test
         SPRING_DATASOURCE_USERNAME: postgres
         SPRING_DATASOURCE_PASSWORD: 1234
-#    networks:
-#      meet-mate_nw:
-#        ipv4_address: 192.168.69.1
 
   postgres:
     image: postgres:16
