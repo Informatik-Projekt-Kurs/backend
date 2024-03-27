@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -16,10 +17,10 @@ import java.util.LinkedList;
 
 @Component
 @RequiredArgsConstructor
-public class IPRateLimiter extends OncePerRequestFilter {
+public class IPRateLimiter extends OncePerRequestFilter  {
 
   private final HashMap<String, LinkedList<Long>> requests = new HashMap<>();
-  private final int maxRequests = 5;
+  private final int maxRequests = 2;
   private final long refreshTime = 1000 * 10; // 10 seconds
 
   @Override
@@ -48,10 +49,10 @@ public class IPRateLimiter extends OncePerRequestFilter {
   }
 
   private void clearRequests(String ip) {
-    for (int i = 0; i < requests.get(ip).size(); i++) {
-      if (System.currentTimeMillis() - requests.get(ip).get(i) > refreshTime)
-        requests.get(ip).remove(i);
-    }
+    while (!requests.isEmpty()
+        && System.currentTimeMillis() - requests.get(ip).getFirst() > refreshTime)
+      requests.get(ip).remove();
+
   }
 
 }
