@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 
 @Component
@@ -29,9 +27,7 @@ public class GlobalRateLimiter extends OncePerRequestFilter {
       @NotNull FilterChain filterChain)
       throws ServletException, IOException {
 
-    String ip = request.getRemoteAddr();
-
-      requests.addLast(System.currentTimeMillis());
+    requests.addLast(System.currentTimeMillis());
 
     clearRequests();
 
@@ -45,10 +41,10 @@ public class GlobalRateLimiter extends OncePerRequestFilter {
   }
 
   private void clearRequests() {
-    for (int i = 0; i < requests.size(); i++) {
-      if (System.currentTimeMillis() - requests.get(i) > refreshTime)
-        requests.remove(i);
-    }
+    while (!requests.isEmpty()
+        && System.currentTimeMillis() - requests.getFirst() > refreshTime)
+      requests.remove();
+
   }
 
 }
