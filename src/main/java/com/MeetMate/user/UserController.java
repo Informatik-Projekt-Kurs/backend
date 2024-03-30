@@ -62,8 +62,7 @@ public class UserController {
 
       if (tc == NameAlreadyBoundException.class)
         return ResponseEntity.status(HttpStatus.CONFLICT)
-            .header("message: ", t.getMessage())
-            .build();
+            .body("message: " + t.getMessage());
 
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("message: " + t.getMessage());
