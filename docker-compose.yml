@@ -3,8 +3,8 @@ services:
 
   meet-mate:
     build:
-      context: ./
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./Dockerfile
     ports:
       - "8081:8080"
     depends_on:
