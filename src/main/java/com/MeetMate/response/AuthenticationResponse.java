@@ -11,5 +11,5 @@ public class AuthenticationResponse {
 
   String access_Token;
   long expires_at;
-  String refresh_token;
+  String refresh_Token;
 }

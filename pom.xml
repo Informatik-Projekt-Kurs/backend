@@ -15,6 +15,21 @@
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+       		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.release>17</maven.compiler.release>
+       		<maven.compiler.verbose>true</maven.compiler.verbose> 
+	</properties>
+
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>backend</id>
+			<name>MeetMate Backend</name>
+			<url>https://github.com/Informatik-Projekt-Kurs/backend</url>
+			<layout>default</layout>
+		</repository>
+	</distributionManagement>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -108,6 +123,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>MeetMate</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -119,6 +135,14 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+				<configuration>
+					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
 			<plugin>
