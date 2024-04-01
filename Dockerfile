@@ -9,5 +9,9 @@ RUN mvn clean package -DskipTests=true
 # Run the application
 FROM openjdk:17
 WORKDIR /app
+# Create a group and user
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 COPY --from=builder /app/target/MeetMate.jar /app/MeetMate.jar
+# Use the created user
+USER appuser
 CMD ["java", "-jar", "MeetMate.jar"]
