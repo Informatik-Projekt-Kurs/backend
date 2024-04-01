@@ -3,7 +3,7 @@ services:
 
   meet-mate:
     build:
-      context: .
+      context: ./
       dockerfile: Dockerfile
     ports:
       - "8081:8080"
