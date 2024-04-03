@@ -30,7 +30,7 @@ public class SecurityConfig {
                     .permitAll() // Whitelist
                     .anyRequest()
                     .authenticated() // Everything else should be authenticated
-            )
+        )
         .sessionManagement(
             sessionManagement ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

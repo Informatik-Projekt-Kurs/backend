@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.core.Ordered;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     if (userEmail != null
         && SecurityContextHolder.getContext().getAuthentication()
-            == null) { // check f if user is already authenticated
+        == null) { // check f if user is already authenticated
       UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
       if (jwtService.isTokenValid(jwt, userDetails)) {
