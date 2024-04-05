@@ -1,0 +1,12 @@
+#graphqls for graphql scema
+
+type Query {
+  getUsers(id: ID): User
+}
+
+type User {
+  id: ID
+  name: String
+  email: String
+  password: String
+}
