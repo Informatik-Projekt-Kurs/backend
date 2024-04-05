@@ -28,15 +28,13 @@ public class SecurityConfig {
 //                    .requestMatchers("/api/user/login", "/api/user/signup", "/test/test")
                                                             .requestMatchers("/**")
                     .permitAll() // Whitelist
-                    .anyRequest()
-                    .authenticated() // Everything else should be authenticated
+                    .anyRequest().authenticated() // Everything else should be authenticated
         )
         .sessionManagement(
             sessionManagement ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(authenticationProvider)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
     return httpSecurity.build();
   }
 }
