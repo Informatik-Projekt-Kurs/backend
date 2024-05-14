@@ -8,11 +8,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
@@ -26,7 +27,7 @@ public class JwtService {
     return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
   }
 
-  public boolean isTokenExpired(String token) {
+  private boolean isTokenExpired(String token) {
     long expirationDate = extractClaim(token, Claims::getExpiration).getTime();
     return expirationDate < System.currentTimeMillis();
   }

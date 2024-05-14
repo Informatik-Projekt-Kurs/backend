@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.core.Ordered;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,22 +29,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       @NotNull HttpServletResponse response,
       @NotNull FilterChain filterChain)
       throws ServletException, IOException {
-
     final String authHeader = request.getHeader("Authorization");
     final String jwt;
     final String userEmail;
+
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       filterChain.doFilter(request, response);
       return;
     }
-    // extract jwt token
-    // beginIndex is 7 bc "Bearer " is 7
-    jwt = authHeader.substring(7);
+    
+    jwt = authHeader.substring(7);// beginIndex is 7 bc "Bearer " is 7
     userEmail = jwtService.extractUserEmail(jwt);
 
     if (userEmail != null
-        && SecurityContextHolder.getContext().getAuthentication()
-            == null) { // check f if user is already authenticated
+        && SecurityContextHolder.getContext().getAuthentication() == null) { // check f if user is already authenticated
       UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
       if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -57,6 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
       }
     }
+
     filterChain.doFilter(request, response);
   }
 
