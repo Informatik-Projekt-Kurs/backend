@@ -29,15 +29,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       @NotNull HttpServletResponse response,
       @NotNull FilterChain filterChain)
       throws ServletException, IOException {
-    System.out.println(response.getStatus());
     final String authHeader = request.getHeader("Authorization");
     final String jwt;
     final String userEmail;
+
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       filterChain.doFilter(request, response);
       return;
     }
-    System.out.println(response.getStatus());
+    
     jwt = authHeader.substring(7);// beginIndex is 7 bc "Bearer " is 7
     userEmail = jwtService.extractUserEmail(jwt);
 
@@ -54,9 +54,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
       }
     }
-    System.out.println(response.getStatus());
+
     filterChain.doFilter(request, response);
-    System.out.println(response.getStatus());
   }
 
 }

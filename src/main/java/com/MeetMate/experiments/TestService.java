@@ -5,15 +5,14 @@ import com.MeetMate.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Service;
 
 
-@RequiredArgsConstructor
-@Service
-public class TestService {
+  @RequiredArgsConstructor
+  @Service
+  public class TestService {
 
-  private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
   public User getUsers(long id) {
     return userRepository.findUserById(id)
