@@ -19,7 +19,7 @@ import java.util.LinkedList;
 public class IPRateLimiter extends OncePerRequestFilter {
 
   private final HashMap<String, LinkedList<Long>> requests = new HashMap<>();
-  private final int maxRequests = 2;
+  private final int maxRequests = 5;
   private final long refreshTime = 1000 * 10; // 10 seconds
 
   @Override
