@@ -9,6 +9,7 @@ services:
       - "8081:8080"
     depends_on:
       - postgres
+      - mongodb
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test
       SPRING_DATASOURCE_USERNAME: postgres
@@ -25,3 +26,39 @@ services:
       - "5432:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    networks:
+        - mongo-net
+    volumes:
+      - data:/data
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: 1234
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: always
+    ports:
+      - "8082:8081"
+    networks:
+      - mongo-net
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: 1234
+      ME_CONFIG_MONGODB_SERVER: mongodb
+
+volumes:
+    data: {}
+
+networks:
+  mongo-net:
+    driver: bridge
