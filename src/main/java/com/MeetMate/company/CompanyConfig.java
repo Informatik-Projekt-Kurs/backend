@@ -1,12 +1,12 @@
-package com.MeetMate.company;
-
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class CompanyConfig {
-
+//package com.MeetMate.company;
+//
+//import org.springframework.boot.CommandLineRunner;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//
+//@Configuration
+//public class CompanyConfig {
+//
 //    @Bean
 //    public CommandLineRunner run(CompanyRepository companyRepository) throws Exception {
 //        return args -> {
@@ -20,6 +20,6 @@ public class CompanyConfig {
 //            companyRepository.save(company);
 //        };
 //    }
-
-
-}
+//
+//
+//}

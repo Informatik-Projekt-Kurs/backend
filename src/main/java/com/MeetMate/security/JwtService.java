@@ -53,9 +53,15 @@ public class JwtService {
         .compact();
   }
 
-  // Claims::getSubject
   public String extractUserEmail(String token) {
     return extractClaim(token, Claims::getSubject);
+  }
+
+  public long extractCompanyId(String token) {
+    Claims claims = extractAllClaims(token);
+    if(claims.get("userRole").equals("COMPANY_OWNER"))
+      return (long) claims.get("companyId");
+    throw new IllegalArgumentException("User is not a company owner");
   }
 
   @Experimentational

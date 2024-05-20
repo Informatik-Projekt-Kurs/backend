@@ -15,4 +15,9 @@ public class Company {
     private BusinessType businessType;
     private long[] members;
     private long ownerId;
+
+    public Company(String name, long ownerId) {
+        this.name = name;
+        this.ownerId = ownerId;
+    }
 }
