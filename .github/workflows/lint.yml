@@ -1,0 +1,59 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+
+    - name: Cache Maven Packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Run Checkstyle
+      run: mvn checkstyle:checkstyle
+
+    - name: Run SpotBugs
+      run: mvn spotbugs:spotbugs
+
+    - name: Run PMD
+      run: mvn pmd:pmd
+
+    - name: Upload Checkstyle Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: checkstyle-report
+        path: target/checkstyle-result.xml
+
+    - name: Upload SpotBugs Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: spotbugs-report
+        path: target/spotbugsXml.xml
+
+    - name: Upload PMD Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: pmd-report
+        path: target/pmd.xml
