@@ -1,6 +1,6 @@
 package com.MeetMate.response;
 
-import com.MeetMate.roles.Role;
+import com.MeetMate.enums.UserRole;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,5 +15,5 @@ public class GetResponse {
   String name;
   LocalDate created_at;
   String email;
-  Role role;
+  UserRole role;
 }

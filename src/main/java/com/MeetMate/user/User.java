@@ -1,7 +1,7 @@
 package com.MeetMate.user;
 
-import com.MeetMate.experiments.Experimentational;
-import com.MeetMate.roles.Role;
+import com.MeetMate._experiments.Experimentational;
+import com.MeetMate.enums.UserRole;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -31,7 +31,7 @@ public class User implements UserDetails {
   private String refreshToken;
 
   @Enumerated(EnumType.STRING)
-  private Role role;
+  private UserRole role;
 
   // Last login
   // bool verified
@@ -52,7 +52,7 @@ public class User implements UserDetails {
     this.email = email;
     this.password = password;
     this.createdAt = LocalDate.now();
-    role = Role.CLIENT;
+    role = UserRole.CLIENT;
   }
 
   @Experimentational

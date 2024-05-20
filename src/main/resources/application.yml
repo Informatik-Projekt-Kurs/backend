@@ -15,8 +15,9 @@ spring:
   data:
     mongodb:
       authentication-database: admin
-    username: root
-    password: 1234
-    database: test
-    port: 27017
-    host: localhost
+      username: root
+      password: pass
+      database: test
+      port: 27017
+      host: localhost
+      auto-index-creation: true

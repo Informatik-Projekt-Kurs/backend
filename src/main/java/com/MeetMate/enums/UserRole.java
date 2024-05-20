@@ -1,6 +1,6 @@
-package com.MeetMate.roles;
+package com.MeetMate.enums;
 
-public enum Role {
+public enum UserRole {
   ADMIN,
   CLIENT,
   COMPANY_OWNER,
