@@ -34,16 +34,6 @@
             <url>https://github.com/Informatik-Projekt-Kurs/backend</url>
             <layout>default</layout>
         </repository>
-         <repository>
-             <id>com.springsource.repository.bundles.release</id>
-             <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-             <url>http://repository.springsource.com/maven/bundles/release</url>
-         </repository>
-         <repository>
-             <id>com.springsource.repository.bundles.external</id>
-             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-             <url>http://repository.springsource.com/maven/bundles/external</url>
-         </repository>
     </distributionManagement>
 
     <dependencies>
@@ -99,12 +89,14 @@
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>${pmd.version}</version>
                 <configuration>
-                    <linkXRef>false</linkXRef>
-                    <rulesets>
-                        <ruleset>ruleset.xml</ruleset>
-                    </rulesets>
-                    <failOnViolation>true</failOnViolation>
-                </configuration>
+                          <linkXRef>false</linkXRef>
+                          <rulesets>
+                              <ruleset>rulesets/java/basic.xml</ruleset>
+                              <ruleset>rulesets/java/braces.xml</ruleset>
+                              <ruleset>rulesets/java/naming.xml</ruleset>
+                          </rulesets>
+                          <failOnViolation>true</failOnViolation>
+                      </configuration>
                 <executions>
                     <execution>
                         <id>pmd</id>
