@@ -33,6 +33,8 @@ public class User implements UserDetails {
   @Enumerated(EnumType.STRING)
   private UserRole role;
 
+  private long companyId;
+
   // Last login
   // bool verified
 
@@ -47,12 +49,12 @@ public class User implements UserDetails {
     this.createdAt = LocalDate.now();
   }
 
-  public User(String name, String email, String password) {
+  public User(String name, String email, String password, UserRole role) {
     this.name = name;
     this.email = email;
     this.password = password;
+    this.role = role;
     this.createdAt = LocalDate.now();
-    role = UserRole.CLIENT;
   }
 
   @Experimentational

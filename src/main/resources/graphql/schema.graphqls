@@ -1,7 +1,7 @@
 #graphqls for graphql scema
 
 type Query {
-    getCompany(id: ID!): Company
+    getCompany: Company
 
     #Experiments
     getUsers(id: ID!): User
@@ -33,6 +33,6 @@ type Company {
     name: String
     description: String
     businessType: String
-    members: [ID]
-    owner: ID
+    memberEmails: [String]
+    ownerEmail: String
 }

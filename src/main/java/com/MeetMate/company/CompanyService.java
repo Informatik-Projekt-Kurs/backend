@@ -1,5 +1,6 @@
 package com.MeetMate.company;
 
+import com.MeetMate.enums.UserRole;
 import com.MeetMate.security.JwtService;
 import com.MeetMate.user.UserController;
 import com.MeetMate.user.UserRepository;
@@ -8,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import java.lang.reflect.InaccessibleObjectException;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +20,15 @@ public class CompanyService {
     private final JwtService jwtService;
 
     public Company getCompany(String token) throws IllegalArgumentException {
-        //Throws IllegalArgumentException if user is not a company owner
-        long id = jwtService.extractCompanyId(token);
+        String ownerEmail = jwtService.extractUserEmail(token);
 
-        return companyRepository.findCompanyById(id)
+        //Test if user is a company owner
+        if (userRepository.findUserByEmail(ownerEmail)
+                .orElseThrow(() -> new EntityNotFoundException("User not found!"))
+                .getRole() != UserRole.COMPANY_OWNER)
+            throw new IllegalArgumentException("User is not a company owner");
+
+        return companyRepository.findCompanyByOwnerEmail(ownerEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Company not found"));
     }
 
@@ -34,15 +38,12 @@ public class CompanyService {
         ownerData.add("email", ownerEmail);
         ownerData.add("name", ownerName);
         ownerData.add("password", ownerPassword);
+        ownerData.add("role", UserRole.COMPANY_OWNER.toString());
 
         //Get id of company Owner
         userController.registerNewUser(ownerData);
-        long ownerId = userRepository.findUserByEmail(ownerEmail)
-                .orElseThrow(() -> new InaccessibleObjectException("Company owner Creation failed"))
-                .getId();
 
-        companyRepository.save(new Company(companyName, ownerId));
+        companyRepository.save(new Company(companyName, ownerEmail));
     }
-
 
 }

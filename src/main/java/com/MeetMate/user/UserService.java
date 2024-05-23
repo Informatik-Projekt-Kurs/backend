@@ -1,5 +1,6 @@
 package com.MeetMate.user;
 
+import com.MeetMate.enums.UserRole;
 import com.MeetMate.response.AuthenticationResponse;
 import com.MeetMate.response.GetResponse;
 import com.MeetMate.response.RefreshResponse;
@@ -53,6 +54,12 @@ public class UserService {
     String email = data.getFirst("email");
     String name = data.getFirst("name");
     String password = data.getFirst("password");
+    UserRole role;
+
+    if(data.getFirst("role") == null)
+      role = UserRole.CLIENT;
+    else
+      role = UserRole.valueOf(data.getFirst("role"));
 
     if (email == null
         || email.isEmpty()
@@ -64,7 +71,7 @@ public class UserService {
     if (userRepository.findUserByEmail(email).isPresent())
       throw new NameAlreadyBoundException("Email taken");
 
-    userRepository.save(new User(name, email, passwordEncoder.encode(password)));
+    userRepository.save(new User(name, email, passwordEncoder.encode(password), role));
   }
 
   @Transactional

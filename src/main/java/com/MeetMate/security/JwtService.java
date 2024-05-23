@@ -1,6 +1,7 @@
 package com.MeetMate.security;
 
 import com.MeetMate._experiments.Experimentational;
+import com.MeetMate.enums.UserRole;
 import com.MeetMate.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -59,7 +60,7 @@ public class JwtService {
 
   public long extractCompanyId(String token) {
     Claims claims = extractAllClaims(token);
-    if(claims.get("userRole").equals("COMPANY_OWNER"))
+    if(claims.get("role").equals(UserRole.COMPANY_OWNER.toString()))
       return (long) claims.get("companyId");
     throw new IllegalArgumentException("User is not a company owner");
   }
