@@ -2,9 +2,6 @@
 
 type Query {
     getCompany: Company
-
-    #Experiments
-    getUsers(id: ID!): User
 }
 
 type Mutation {
@@ -15,17 +12,13 @@ type Mutation {
         ownerPassword: String!
     ): String
 
-    #Experiments
-    updateUser(name: String, email: String!, password: String): String
-    createUser(name: String!, email: String!, password: String!): String
+    editCompany(
+        companyName: String,
+        description: String,
+        businessType: String
+    ): String
 
-}
-
-type User {
-    id: ID
-    name: String
-    email: String
-    password: String
+    deleteCompany: String
 }
 
 type Company {
