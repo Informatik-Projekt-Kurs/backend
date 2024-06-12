@@ -1,17 +1,31 @@
 #graphqls for graphql scema
 
 type Query {
-  getUsers(id: ID!): User
+    getCompany: Company
 }
 
 type Mutation {
-  updateUser(name: String, email: String!, password: String): String
-  createUser(name: String!, email: String!, password: String!): String
+    createCompany(
+        companyName: String!,
+        ownerEmail: String!,
+        ownerName: String!,
+        ownerPassword: String!
+    ): String
+
+    editCompany(
+        companyName: String,
+        description: String,
+        businessType: String
+    ): String
+
+    deleteCompany: String
 }
 
-type User {
-  id: ID
-  name: String
-  email: String
-  password: String
+type Company {
+    id: ID
+    name: String
+    description: String
+    businessType: String
+    memberEmails: [String]
+    ownerEmail: String
 }

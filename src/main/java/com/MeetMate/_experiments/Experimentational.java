@@ -1,4 +1,4 @@
-package com.MeetMate.experiments;
+package com.MeetMate._experiments;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -1,4 +1,4 @@
-package com.MeetMate.experiments;
+package com.MeetMate._experiments;
 
 import com.MeetMate.user.User;
 import lombok.RequiredArgsConstructor;

@@ -112,8 +112,7 @@ public class UserController {
 
   @PostMapping(path = "refresh")
   @ResponseBody
-  public ResponseEntity<?> refreshAccessToken(
-      @RequestHeader(name = "Authorization") String refreshToken) {
+  public ResponseEntity<?> refreshAccessToken(@RequestHeader(name = "Authorization") String refreshToken) {
     refreshToken = refreshToken.substring(7);
     try {
       return ResponseEntity.ok(userService.refreshAccessToken(refreshToken));
@@ -147,7 +146,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body("message: " + t.getMessage());
+          .body("type: " + tc + "\nmessage: " + t.getMessage());
     }
   }
 }

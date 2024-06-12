@@ -1,5 +1,6 @@
 package com.MeetMate.user;
 
+import com.MeetMate.enums.UserRole;
 import com.MeetMate.response.AuthenticationResponse;
 import com.MeetMate.response.GetResponse;
 import com.MeetMate.response.RefreshResponse;
@@ -7,15 +8,16 @@ import com.MeetMate.security.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
-import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
+
+import javax.naming.NameAlreadyBoundException;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -49,10 +51,17 @@ public class UserService {
     return userRepository.findAll();
   }
 
+  @Transactional
   public void registerNewUser(MultiValueMap<String, String> data) throws NameAlreadyBoundException {
     String email = data.getFirst("email");
     String name = data.getFirst("name");
     String password = data.getFirst("password");
+    UserRole role;
+
+    if (data.getFirst("role") == null)
+      role = UserRole.CLIENT;
+    else
+      role = UserRole.valueOf(data.getFirst("role"));
 
     if (email == null
         || email.isEmpty()
@@ -64,7 +73,7 @@ public class UserService {
     if (userRepository.findUserByEmail(email).isPresent())
       throw new NameAlreadyBoundException("Email taken");
 
-    userRepository.save(new User(name, email, passwordEncoder.encode(password)));
+    userRepository.save(new User(name, email, passwordEncoder.encode(password), role));
   }
 
   @Transactional
@@ -108,6 +117,7 @@ public class UserService {
         .build();
   }
 
+  @Transactional
   public RefreshResponse refreshAccessToken(String refreshToken) {
     String email = jwtService.extractUserEmail(refreshToken);
     User user =
@@ -126,17 +136,14 @@ public class UserService {
     return RefreshResponse.builder().access_Token(token).expires_at(exp).build();
   }
 
+  @Transactional
   public void deleteUser(String token) {
     String email = jwtService.extractUserEmail(token);
-
     User user =
         userRepository
             .findUserByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
-    long userId = user.getId();
-    if (!userRepository.existsById(userId))
-      throw new EntityNotFoundException("User does not exist");
 
-    userRepository.deleteById(userId);
+    userRepository.deleteByEmail(email);
   }
 }
