@@ -12,3 +12,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  data:
+    mongodb:
+      authentication-database: admin
+    username: root
+    password: 1234
+    database: test
+    port: 27017
+    host: localhost
