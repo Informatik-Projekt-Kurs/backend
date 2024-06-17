@@ -21,10 +21,9 @@ public class CompanyController {
   private final CompanyService companyService;
 
   @QueryMapping
-  public Company getCompany(@ContextValue(name = "token") String token) {
-    token = token.substring(7);
+  public Company getCompany(@Argument long id) {
     try {
-      return companyService.getCompany(token);
+      return companyService.getCompany(id);
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();

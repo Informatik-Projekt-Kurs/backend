@@ -13,6 +13,8 @@ public interface CompanyRepository extends MongoRepository<Company, Long> {
 
     Optional<Company> findCompanyByOwnerEmail(String ownerEmail);
 
+    Optional<Company> findCompanyById(long id);
+
 //    @Modifying
 //    @Query("{ 'ownerEmail': :#{#ownerEmail} }")
 //    Company updateByOwnerEmail(String ownerEmail);

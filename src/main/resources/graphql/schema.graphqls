@@ -1,7 +1,7 @@
 #graphqls for graphql scema
 
 type Query {
-    getCompany: Company
+    getCompany(id: ID!): Company
 }
 
 type Mutation {

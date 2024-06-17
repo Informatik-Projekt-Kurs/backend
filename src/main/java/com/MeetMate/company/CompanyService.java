@@ -1,5 +1,7 @@
 package com.MeetMate.company;
 
+import com.MeetMate.company.sequence.CompanySequence;
+import com.MeetMate.company.sequence.SequenceService;
 import com.MeetMate.enums.BusinessType;
 import com.MeetMate.enums.UserRole;
 import com.MeetMate.security.JwtService;
@@ -25,17 +27,17 @@ public class CompanyService {
   private final CompanyRepository companyRepository;
   private final JwtService jwtService;
   private final MongoTemplate mongoTemplate;
+  private final SequenceService sequenceService;
 
-  public Company getCompany(String token) throws IllegalArgumentException {
-    String ownerEmail = jwtService.extractUserEmail(token);
+  public Company getCompany(long id) throws IllegalArgumentException {
 
     //Test if user is a company owner
-    if (userRepository.findUserByEmail(ownerEmail)
+    if (userRepository.findUserById(id)
         .orElseThrow(() -> new EntityNotFoundException("User not found!"))
         .getRole() != UserRole.COMPANY_OWNER)
       throw new IllegalArgumentException("User is not a company owner");
 
-    return companyRepository.findCompanyByOwnerEmail(ownerEmail)
+    return companyRepository.findCompanyById(id)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
   }
 
@@ -50,12 +52,13 @@ public class CompanyService {
 
     userController.registerNewUser(ownerData);
 
-    companyRepository.save(new Company(companyName, ownerEmail));
+    long companyId = sequenceService.getCurrentValue();
+    companyRepository.save(new Company(companyId, companyName, ownerEmail));
   }
 
   @Transactional
   public void editCompany(String token, String companyName, String description, String businessType) {
-    Company company = getCompany(token);
+    Company company = getCompanyWithToken(token);
     String ownerEmail = jwtService.extractUserEmail(token);
 //        if(companyName != null) company.setName(companyName);
 //        if(description != null) company.setDescription(description);
@@ -72,12 +75,24 @@ public class CompanyService {
 
   @Transactional
   public void deleteCompany(String token) {
-    Company company = getCompany(token);
+    Company company = getCompanyWithToken(token);
     try {
       userController.deleteUser(token);
     } catch (Throwable t) {
       return;
     }
     companyRepository.delete(company);
+  }
+
+  private Company getCompanyWithToken(String ownerEmail) throws IllegalArgumentException {
+
+    //Test if user is a company owner
+    if (userRepository.findUserByEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("User not found!"))
+        .getRole() != UserRole.COMPANY_OWNER)
+      throw new IllegalArgumentException("User is not a company owner");
+
+    return companyRepository.findCompanyByOwnerEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("Company not found"));
   }
 }
