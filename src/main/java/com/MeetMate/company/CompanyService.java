@@ -1,10 +1,8 @@
 package com.MeetMate.company;
 
-import com.MeetMate.company.sequence.CompanySequence;
 import com.MeetMate.company.sequence.SequenceService;
 import com.MeetMate.enums.BusinessType;
 import com.MeetMate.enums.UserRole;
-import com.MeetMate.security.JwtService;
 import com.MeetMate.user.UserController;
 import com.MeetMate.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,7 +23,6 @@ public class CompanyService {
   private final UserController userController;
   private final UserRepository userRepository;
   private final CompanyRepository companyRepository;
-  private final JwtService jwtService;
   private final MongoTemplate mongoTemplate;
   private final SequenceService sequenceService;
 
@@ -52,18 +49,13 @@ public class CompanyService {
 
     userController.registerNewUser(ownerData);
 
-    long companyId = sequenceService.getCurrentValue();
+    long companyId = sequenceService.getAndIncrementCurrentValue();
     companyRepository.save(new Company(companyId, companyName, ownerEmail));
   }
 
   @Transactional
   public void editCompany(String token, String companyName, String description, String businessType) {
-    Company company = getCompanyWithToken(token);
-    String ownerEmail = jwtService.extractUserEmail(token);
-//        if(companyName != null) company.setName(companyName);
-//        if(description != null) company.setDescription(description);
-//        if(businessType != null) company.setBusinessType(BusinessType.valueOf(businessType));
-//        companyRepository.save(company);
+    String ownerEmail = getCompanyWithToken(token).getOwnerEmail();
 
     Query query = new Query(Criteria.where("ownerEmail").is(ownerEmail));
     Update update = new Update();
