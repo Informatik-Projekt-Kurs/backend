@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @NoArgsConstructor
 public class Company {
+    private long id;
     private String name;
     private String description;
     private BusinessType businessType;
@@ -17,7 +18,8 @@ public class Company {
     @Indexed(unique = true)
     private String ownerEmail;
 
-    public Company(String name, String ownerEmail) {
+    public Company(long id,String name, String ownerEmail) {
+        this.id = id;
         this.name = name;
         this.ownerEmail = ownerEmail;
         this.description = "";
