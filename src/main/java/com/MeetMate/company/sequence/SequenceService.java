@@ -21,12 +21,10 @@ public class SequenceService {
     mongoTemplate.updateFirst(query, update, CompanySequence.class);
   }
 
-  public long getAndIncrementCurrentValue(){
+  public long getCurrentValue(){
     Query query = new Query(Criteria.where("_id").is("company_sequence"));
     CompanySequence sequence = mongoTemplate.findOne(query, CompanySequence.class);
-    long value = sequence.getValue();
-    incrementId();
-    return value;
+    return sequence.getValue();
   }
 
 

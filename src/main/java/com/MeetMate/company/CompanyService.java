@@ -40,17 +40,19 @@ public class CompanyService {
 
   @Transactional
   public void createCompany(String companyName, String ownerEmail, String ownerName, String ownerPassword) {
+    long companyId = sequenceService.getCurrentValue();
     //Create the company owner
     MultiValueMap<String, String> ownerData = new LinkedMultiValueMap<>();
     ownerData.add("email", ownerEmail);
     ownerData.add("name", ownerName);
     ownerData.add("password", ownerPassword);
     ownerData.add("role", UserRole.COMPANY_OWNER.toString());
+    ownerData.add("associatedCompany", String.valueOf(companyId));
 
     userController.registerNewUser(ownerData);
 
-    long companyId = sequenceService.getAndIncrementCurrentValue();
     companyRepository.save(new Company(companyId, companyName, ownerEmail));
+    sequenceService.incrementId();
   }
 
   @Transactional
