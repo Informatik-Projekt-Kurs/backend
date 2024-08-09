@@ -56,12 +56,15 @@ public class UserService {
     String email = data.getFirst("email");
     String name = data.getFirst("name");
     String password = data.getFirst("password");
-    UserRole role;
+    String role = data.getFirst("role");
+    long associatedCompany = Long.parseLong(data.getFirst("associatedCompany"));
+    UserRole userRole;
 
-    if (data.getFirst("role") == null)
-      role = UserRole.CLIENT;
+    if (role == null
+        || role.isEmpty())
+      userRole = UserRole.CLIENT;
     else
-      role = UserRole.valueOf(data.getFirst("role"));
+      userRole = UserRole.valueOf(role);
 
     if (email == null
         || email.isEmpty()
@@ -71,9 +74,17 @@ public class UserService {
         || name.isEmpty()) throw new IllegalArgumentException("Required argument is missing");
 
     if (userRepository.findUserByEmail(email).isPresent())
-      throw new NameAlreadyBoundException("Email taken");
+      throw new NameAlreadyBoundException("Email already taken");
 
-    userRepository.save(new User(name, email, passwordEncoder.encode(password), role));
+    User user = new User(name, email, passwordEncoder.encode(password), userRole);
+
+    switch (userRole) {
+      case COMPANY_OWNER, COMPANY_MEMBER -> user.setAssociatedCompany(associatedCompany);
+      case CLIENT -> user.setAssociatedCompany(-1);
+      default -> throw new IllegalStateException(role + "is invalid!");
+    }
+
+    userRepository.save(user);
   }
 
   @Transactional

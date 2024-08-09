@@ -34,12 +34,12 @@ services:
     ports:
       - "27017:27017"
     networks:
-        - mongo-net
+      - mongo-net
     volumes:
       - data:/data
     environment:
-        MONGO_INITDB_ROOT_USERNAME: root
-        MONGO_INITDB_ROOT_PASSWORD: pass
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass
 
   mongo-express:
     image: mongo-express
@@ -57,7 +57,7 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongodb
 
 volumes:
-    data: {}
+  data: { }
 
 networks:
   mongo-net:

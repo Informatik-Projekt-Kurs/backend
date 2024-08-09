@@ -3,15 +3,16 @@ package com.MeetMate.user;
 import com.MeetMate._experiments.Experimentational;
 import com.MeetMate.enums.UserRole;
 import jakarta.persistence.*;
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
@@ -21,22 +22,17 @@ public class User implements UserDetails {
   @SequenceGenerator(name = "user_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
   private Long id;
-
   private String name;
-
-  private LocalDate createdAt;
-
   private String email;
   private String password;
-  private String refreshToken;
-
+  private LocalDate createdAt;
+  // Last login
   @Enumerated(EnumType.STRING)
   private UserRole role;
-
-  private long companyId;
-
-  // Last login
+  private String refreshToken;
   // bool verified
+  private long associatedCompany;
+  private long[] subscribedCompanies;
 
   public User() {}
 
@@ -53,10 +49,9 @@ public class User implements UserDetails {
     this.name = name;
     this.email = email;
     this.password = password;
-    this.role = role;
     this.createdAt = LocalDate.now();
+    this.role = role;
   }
-
   @Experimentational
   public User(String email, String password) {
     this.email = email;
