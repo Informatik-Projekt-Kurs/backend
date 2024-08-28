@@ -1,10 +1,16 @@
 #graphqls for graphql scema
 
 type Query {
+
+    #Company Queries
     getCompany(id: ID!): Company
+
+    #Appointment Queries
 }
 
 type Mutation {
+
+    #Company Mutations
     createCompany(
         companyName: String!,
         ownerEmail: String!,
@@ -19,6 +25,8 @@ type Mutation {
     ): String
 
     deleteCompany: String
+
+    #Appointment Mutations
 }
 
 type Company {
