@@ -28,7 +28,7 @@ services:
       - ./data:/var/lib/postgresql/data
 
   mongodb:
-    image: mongo:latest
+    image: mongo:4.9
     container_name: mongodb
     restart: always
     ports:
