@@ -1,4 +1,4 @@
-package com.MeetMate.appointment;
-
-public class AppointmentService {
-}
+//package com.MeetMate.appointment;
+//
+//public class AppointmentService {
+//}
