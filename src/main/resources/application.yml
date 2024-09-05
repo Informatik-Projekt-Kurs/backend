@@ -14,10 +14,6 @@ spring:
         format_sql: true
   data:
     mongodb:
-      authentication-database: admin
-      username: root
-      password: pass
+      uri: mongodb://root:pass@localhost:27017/admin
       database: test
-      port: 27017
-      host: localhost
       auto-index-creation: true

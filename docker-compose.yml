@@ -15,6 +15,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_DATA_MONGODB_URI: mongodb://root:pass@mongodb:27017/admin
+    networks:
+      - postgres-net
+      - mongo-net
 
   postgres:
     image: postgres:16
@@ -27,6 +31,8 @@ services:
       - "5432:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
+    networks:
+      - postgres-net
 
   mongodb:
     image: mongo:4.4
@@ -58,8 +64,10 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongodb
 
 volumes:
-  data: { }
+  data: {}
 
 networks:
+  postgres-net:
+    driver: bridge
   mongo-net:
     driver: bridge
