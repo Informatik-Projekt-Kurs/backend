@@ -53,18 +53,31 @@ public class UserService {
 
   @Transactional
   public void registerNewUser(MultiValueMap<String, String> data) throws NameAlreadyBoundException {
+    System.out.println("Received registration data: " + data);
+
     String email = data.getFirst("email");
     String name = data.getFirst("name");
     String password = data.getFirst("password");
     String role = data.getFirst("role");
+
+    System.out.println("Parsed email: " + email);
+    System.out.println("Parsed name: " + name);
+    System.out.println("Parsed password: " + password);
+
     Long associatedCompany = null;
     String associatedCompanyStr = data.getFirst("associatedCompany");
+    System.out.println("Associated company string: " + associatedCompanyStr);
+
     if (associatedCompanyStr != null && !associatedCompanyStr.isEmpty()) {
       try {
         associatedCompany = Long.parseLong(associatedCompanyStr);
+        System.out.println("Parsed associatedCompany: " + associatedCompany);
       } catch (NumberFormatException e) {
+        System.out.println("ERROR: Failed to parse associatedCompany" + e);
         throw new IllegalArgumentException("Invalid associatedCompany value", e);
       }
+    } else {
+      System.out.println("No associatedCompany provided");
     }
     UserRole userRole = (role == null || role.isEmpty()) ? UserRole.CLIENT : UserRole.valueOf(role);
 
