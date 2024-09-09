@@ -49,7 +49,7 @@ public class CompanyService {
     ownerData.add("role", UserRole.COMPANY_OWNER.toString());
     ownerData.add("associatedCompany", String.valueOf(companyId));
 
-    userController.registerNewUser(ownerData);
+    userController.registerNewUser(ownerEmail, ownerPassword, ownerName);
 
     companyRepository.save(new Company(companyId, companyName, ownerEmail));
     sequenceService.incrementId();
