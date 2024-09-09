@@ -53,53 +53,39 @@ public class UserService {
 
   @Transactional
   public void registerNewUser(MultiValueMap<String, String> data) throws NameAlreadyBoundException {
-    System.out.println("Received registration data: " + data);
-
     String email = data.getFirst("email");
     String name = data.getFirst("name");
     String password = data.getFirst("password");
     String role = data.getFirst("role");
 
-    System.out.println("Parsed email: " + email);
-    System.out.println("Parsed name: " + name);
-    System.out.println("Parsed password: " + password);
-
+    // Make associatedCompany truly optional
     Long associatedCompany = null;
     String associatedCompanyStr = data.getFirst("associatedCompany");
-    System.out.println("Associated company string: " + associatedCompanyStr);
-
     if (associatedCompanyStr != null && !associatedCompanyStr.isEmpty()) {
       try {
         associatedCompany = Long.parseLong(associatedCompanyStr);
-        System.out.println("Parsed associatedCompany: " + associatedCompany);
       } catch (NumberFormatException e) {
-        System.out.println("ERROR: Failed to parse associatedCompany" + e);
         throw new IllegalArgumentException("Invalid associatedCompany value", e);
       }
-    } else {
-      System.out.println("No associatedCompany provided");
     }
-    UserRole userRole = (role == null || role.isEmpty()) ? UserRole.CLIENT : UserRole.valueOf(role);
 
+    // Validate required fields
     if (email == null || email.isEmpty() || password == null || password.isEmpty() || name == null || name.isEmpty()) {
-      throw new IllegalArgumentException("Required argument is missing");
+      throw new IllegalArgumentException("Email, password, and name are required");
     }
 
-    if (userRepository.findUserByEmail(email).isPresent()) {
-      throw new NameAlreadyBoundException("Email already taken");
-    }
+    // Set default role if not provided
+    UserRole userRole = (role == null || role.isEmpty()) ? UserRole.CLIENT : UserRole.valueOf(role);
 
     User user = new User(name, email, passwordEncoder.encode(password), userRole);
 
-    switch (userRole) {
-      case COMPANY_OWNER, COMPANY_MEMBER -> {
-        if (associatedCompany == null) {
-          throw new IllegalArgumentException("associatedCompany is required for COMPANY_OWNER and COMPANY_MEMBER roles");
-        }
-        user.setAssociatedCompany(associatedCompany);
-      }
-      case CLIENT -> user.setAssociatedCompany(-1L);
-      default -> throw new IllegalStateException(role + " is invalid!");
+    // Only set associatedCompany if it's provided
+    if (associatedCompany != null) {
+      user.setAssociatedCompany(associatedCompany);
+    } else if (userRole == UserRole.CLIENT) {
+      user.setAssociatedCompany(-1L);
+    } else if (userRole == UserRole.COMPANY_OWNER || userRole == UserRole.COMPANY_MEMBER) {
+      throw new IllegalArgumentException("associatedCompany is required for COMPANY_OWNER and COMPANY_MEMBER roles");
     }
 
     userRepository.save(user);
