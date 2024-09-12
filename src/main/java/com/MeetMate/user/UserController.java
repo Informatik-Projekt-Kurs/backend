@@ -1,17 +1,17 @@
 package com.MeetMate.user;
 
 import jakarta.persistence.EntityNotFoundException;
-import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import javax.naming.NameAlreadyBoundException;
+
+//.body("message: " + t.getMessage() + "\nStack trace: " + Arrays.toString(t.getStackTrace()));
 
 @RestController
 @RequestMapping(path = "api/user")
@@ -52,25 +52,23 @@ public class UserController {
 
   @PostMapping(path = "signup")
   @ResponseBody
-  public ResponseEntity<?> registerNewUser(
-          @RequestParam String email,
-          @RequestParam String password,
-          @RequestParam String name) {
-
-    System.out.println("Received signup request for email: " + email);
-
+  public ResponseEntity<?> registerNewUser(@RequestParam MultiValueMap<String, String> data) {
     try {
-      MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-      data.add("email", email);
-      data.add("password", password);
-      data.add("name", name);
-
       userService.registerNewUser(data);
       return ResponseEntity.ok().build();
+
     } catch (Throwable t) {
-      System.out.println("Error in registerNewUser " + t);
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("message: " + t.getMessage());
+
+      if (tc == NameAlreadyBoundException.class)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body("message: " + t.getMessage());
+
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-              .body("message: " + t.getMessage() + "\nStack trace: " + Arrays.toString(t.getStackTrace()));
+          .body("message: " + t.getMessage());
     }
   }
 
