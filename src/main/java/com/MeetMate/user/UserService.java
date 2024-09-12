@@ -34,17 +34,17 @@ public class UserService {
     Optional<User> userOptional = userRepository.findUserByEmail(email);
 
     User user =
-            userRepository
-                    .findUserByEmail(email)
-                    .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+        userRepository
+            .findUserByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
     return GetResponse.builder()
-            .id(user.getId())
-            .name(user.getName())
-            .created_at(user.getCreatedAt())
-            .email(user.getEmail())
-            .role(user.getRole())
-            .build();
+        .id(user.getId())
+        .name(user.getName())
+        .created_at(user.getCreatedAt())
+        .email(user.getEmail())
+        .role(user.getRole())
+        .build();
   }
 
   public List<User> getAllUsers() {
@@ -57,35 +57,39 @@ public class UserService {
     String name = data.getFirst("name");
     String password = data.getFirst("password");
     String role = data.getFirst("role");
-
-    // Make associatedCompany truly optional
-    Long associatedCompany = null;
     String associatedCompanyStr = data.getFirst("associatedCompany");
-    if (associatedCompanyStr != null && !associatedCompanyStr.isEmpty()) {
-      try {
-        associatedCompany = Long.parseLong(associatedCompanyStr);
-      } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("Invalid associatedCompany value", e);
-      }
-    }
+    Long associatedCompany = null;
 
     // Validate required fields
-    if (email == null || email.isEmpty() || password == null || password.isEmpty() || name == null || name.isEmpty()) {
+    if (email == null || email.isEmpty()
+        || password == null || password.isEmpty()
+        || name == null || name.isEmpty()) {
       throw new IllegalArgumentException("Email, password, and name are required");
     }
+
+    if (userRepository.findUserByEmail(email).isPresent())
+      throw new NameAlreadyBoundException("Email already taken");
 
     // Set default role if not provided
     UserRole userRole = (role == null || role.isEmpty()) ? UserRole.CLIENT : UserRole.valueOf(role);
 
     User user = new User(name, email, passwordEncoder.encode(password), userRole);
 
-    // Only set associatedCompany if it's provided
-    if (associatedCompany != null) {
-      user.setAssociatedCompany(associatedCompany);
-    } else if (userRole == UserRole.CLIENT) {
-      user.setAssociatedCompany(-1L);
-    } else if (userRole == UserRole.COMPANY_OWNER || userRole == UserRole.COMPANY_MEMBER) {
-      throw new IllegalArgumentException("associatedCompany is required for COMPANY_OWNER and COMPANY_MEMBER roles");
+    if (associatedCompanyStr != null && !associatedCompanyStr.isEmpty())
+      try {
+        associatedCompany = Long.parseLong(associatedCompanyStr);
+      } catch (NumberFormatException nfe) {
+        throw new IllegalArgumentException("Invalid associatedCompany value", nfe);
+      }
+
+    switch (userRole) {
+      case CLIENT -> user.setAssociatedCompany(-1L);
+      case COMPANY_OWNER, COMPANY_MEMBER -> {
+        if (associatedCompany != null) user.setAssociatedCompany(associatedCompany);
+        else
+          throw new IllegalArgumentException("associatedCompany is required for COMPANY_OWNER and COMPANY_MEMBER roles");
+      }
+      default -> throw new IllegalStateException(role + " is invalid!");
     }
 
     userRepository.save(user);
@@ -98,9 +102,9 @@ public class UserService {
     String password = passwordEncoder.encode(data.getFirst("password"));
 
     User user =
-            userRepository
-                    .findUserByEmail(email)
-                    .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
+        userRepository
+            .findUserByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
 
     if (password != null) user.setPassword(password);
     if (name != null) user.setName(name);
@@ -114,39 +118,39 @@ public class UserService {
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 
     User user =
-            userRepository
-                    .findUserByEmail(email)
-                    .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+        userRepository
+            .findUserByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
     String token = jwtService.generateAccessToken(user);
     String refresh = jwtService.generateRefreshToken(user);
     user.setRefreshToken(refresh);
     long exp =
-            jwtService.extractClaim(token, Claims::getExpiration).getTime()
-                    / 1000; // expiration time in seconds
+        jwtService.extractClaim(token, Claims::getExpiration).getTime()
+            / 1000; // expiration time in seconds
 
     return AuthenticationResponse.builder()
-            .access_Token(token)
-            .expires_at(exp)
-            .refresh_Token(refresh)
-            .build();
+        .access_Token(token)
+        .expires_at(exp)
+        .refresh_Token(refresh)
+        .build();
   }
 
   @Transactional
   public RefreshResponse refreshAccessToken(String refreshToken) {
     String email = jwtService.extractUserEmail(refreshToken);
     User user =
-            userRepository
-                    .findUserByEmail(email)
-                    .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+        userRepository
+            .findUserByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
     if (!refreshToken.equals(user.getRefreshToken()))
       throw new IllegalStateException("Refresh token is invalid");
 
     String token = jwtService.generateAccessToken(user);
     long exp =
-            jwtService.extractClaim(token, Claims::getExpiration).getTime()
-                    / 1000; // expiration time in seconds
+        jwtService.extractClaim(token, Claims::getExpiration).getTime()
+            / 1000; // expiration time in seconds
 
     return RefreshResponse.builder().access_Token(token).expires_at(exp).build();
   }
@@ -155,9 +159,9 @@ public class UserService {
   public void deleteUser(String token) {
     String email = jwtService.extractUserEmail(token);
     User user =
-            userRepository
-                    .findUserByEmail(email)
-                    .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
+        userRepository
+            .findUserByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
 
     userRepository.deleteByEmail(email);
   }
