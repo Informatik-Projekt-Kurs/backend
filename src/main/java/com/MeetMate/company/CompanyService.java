@@ -27,13 +27,6 @@ public class CompanyService {
   private final SequenceService sequenceService;
 
   public Company getCompany(long id) throws IllegalArgumentException {
-
-    //Test if user is a company owner
-    if (userRepository.findUserById(id)
-        .orElseThrow(() -> new EntityNotFoundException("User not found!"))
-        .getRole() != UserRole.COMPANY_OWNER)
-      throw new IllegalArgumentException("User is not a company owner");
-
     return companyRepository.findCompanyById(id)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
   }
@@ -57,7 +50,7 @@ public class CompanyService {
 
   @Transactional
   public void editCompany(String token, String companyName, String description, String businessType) {
-    String ownerEmail = getCompanyWithToken(token).getOwnerEmail();
+    String ownerEmail = getCompanyWithOwnerEmail(token).getOwnerEmail();
 
     Query query = new Query(Criteria.where("ownerEmail").is(ownerEmail));
     Update update = new Update();
@@ -69,7 +62,7 @@ public class CompanyService {
 
   @Transactional
   public void deleteCompany(String token) {
-    Company company = getCompanyWithToken(token);
+    Company company = getCompanyWithOwnerEmail(token);
     try {
       userController.deleteUser(token);
     } catch (Throwable t) {
@@ -78,7 +71,7 @@ public class CompanyService {
     companyRepository.delete(company);
   }
 
-  private Company getCompanyWithToken(String ownerEmail) throws IllegalArgumentException {
+  private Company getCompanyWithOwnerEmail(String ownerEmail) throws IllegalArgumentException {
 
     //Test if user is a company owner
     if (userRepository.findUserByEmail(ownerEmail)

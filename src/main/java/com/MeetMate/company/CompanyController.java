@@ -28,13 +28,14 @@ public class CompanyController {
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
-      return null;
+      return new Company(-1, "error", "error");
+
 //            if (tc == EntityNotFoundException.class)
 //                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
-//
+
 //            if (tc == IllegalArgumentException.class)
 //                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
-//
+
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
