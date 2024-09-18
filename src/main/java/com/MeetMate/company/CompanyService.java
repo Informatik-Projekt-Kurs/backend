@@ -3,6 +3,7 @@ package com.MeetMate.company;
 import com.MeetMate.company.sequence.SequenceService;
 import com.MeetMate.enums.BusinessType;
 import com.MeetMate.enums.UserRole;
+import com.MeetMate.security.JwtService;
 import com.MeetMate.user.UserController;
 import com.MeetMate.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +26,7 @@ public class CompanyService {
   private final CompanyRepository companyRepository;
   private final MongoTemplate mongoTemplate;
   private final SequenceService sequenceService;
+  private final JwtService jwtService;
 
   public Company getCompany(long id) throws IllegalArgumentException {
     return companyRepository.findCompanyById(id)
@@ -50,7 +52,7 @@ public class CompanyService {
 
   @Transactional
   public void editCompany(String token, String companyName, String description, String businessType) {
-    String ownerEmail = getCompanyWithOwnerEmail(token).getOwnerEmail();
+    String ownerEmail = getCompanyWithToken(token).getOwnerEmail();
 
     Query query = new Query(Criteria.where("ownerEmail").is(ownerEmail));
     Update update = new Update();
@@ -62,7 +64,7 @@ public class CompanyService {
 
   @Transactional
   public void deleteCompany(String token) {
-    Company company = getCompanyWithOwnerEmail(token);
+    Company company = getCompanyWithToken(token);
     try {
       userController.deleteUser(token);
     } catch (Throwable t) {
@@ -71,9 +73,8 @@ public class CompanyService {
     companyRepository.delete(company);
   }
 
-  private Company getCompanyWithOwnerEmail(String ownerEmail) throws IllegalArgumentException {
-
-    //Test if user is a company owner
+  private Company getCompanyWithToken(String token) throws IllegalArgumentException {
+    String ownerEmail = jwtService.extractUserEmail(token);
     if (userRepository.findUserByEmail(ownerEmail)
         .orElseThrow(() -> new EntityNotFoundException("User not found!"))
         .getRole() != UserRole.COMPANY_OWNER)
