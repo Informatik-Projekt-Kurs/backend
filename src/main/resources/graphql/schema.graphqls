@@ -37,3 +37,25 @@ type Company {
     memberEmails: [String]
     ownerEmail: String
 }
+
+type Appointment {
+    id: ID
+    from: DateTime
+    to: DateTime
+    companyI: ID
+    clientID: ID
+    assigneeID: ID
+    # Select Prompt → f.E. medical industry: Untersuchung, Operation
+    description: String
+    location: String
+    AppointmentStatus: String
+}
+
+type DateTime {
+    year: Int
+    month: Int
+    day: Int
+    hour: Int
+    minute: Int
+    second: Int
+}
