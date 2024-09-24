@@ -6,6 +6,7 @@ type Query {
     getCompany(id: ID!): Company
 
     #Appointment Queries
+    getAppointment(id: ID!): Appointment
 }
 
 type Mutation {
