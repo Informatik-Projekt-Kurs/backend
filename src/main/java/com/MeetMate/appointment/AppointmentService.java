@@ -1,6 +1,6 @@
 package com.MeetMate.appointment;
 
-import com.MeetMate.appointment.sequence.SequenceService;
+import com.MeetMate.appointment.sequence.AppointmentSequenceService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class AppointmentService {
 
   private final AppointmentRepository appointmentRepository;
-  private final SequenceService sequenceService;
+  private final AppointmentSequenceService appointmentSequenceService;
 
   public Appointment getAppointment(long id) {
     return appointmentRepository.findAppointmentById(id)
@@ -23,7 +23,7 @@ public class AppointmentService {
 
   @Transactional
   public void createAppointment(long companyId, long clientId, Map<String, Object> appointmentData) throws IllegalAccessException {
-    long appointmentId = sequenceService.getCurrentValue();
+    long appointmentId = appointmentSequenceService.getCurrentValue();
 
     Appointment appointment = new Appointment(appointmentId, companyId, clientId);
     Field[] fields = Appointment.class.getDeclaredFields();
@@ -31,8 +31,8 @@ public class AppointmentService {
       field.setAccessible(true);
       field.set(appointment, appointmentData.get(field.getName()));
     }
-    
+
     appointmentRepository.save(appointment);
-    sequenceService.incrementId();
+    appointmentSequenceService.incrementId();
   }
 }

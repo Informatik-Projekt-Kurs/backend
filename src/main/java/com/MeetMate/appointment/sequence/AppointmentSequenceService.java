@@ -1,4 +1,4 @@
-package com.MeetMate.company.sequence;
+package com.MeetMate.appointment.sequence;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -10,20 +10,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SequenceService {
+public class AppointmentSequenceService {
 
   private final MongoTemplate mongoTemplate;
 
   @Transactional
   public void incrementId() {
-    Query query = new Query(Criteria.where("_id").is("company_sequence"));
+    Query query = new Query(Criteria.where("_id").is("appointment_sequence"));
     Update update = new Update().inc("value", 1);
-    mongoTemplate.updateFirst(query, update, CompanySequence.class);
+    mongoTemplate.updateFirst(query, update, AppointmentSequence.class);
   }
 
   public long getCurrentValue(){
-    Query query = new Query(Criteria.where("_id").is("company_sequence"));
-    CompanySequence sequence = mongoTemplate.findOne(query, CompanySequence.class);
+    Query query = new Query(Criteria.where("_id").is("appointment_sequence"));
+    AppointmentSequence sequence = mongoTemplate.findOne(query, AppointmentSequence.class);
     return sequence.getValue();
   }
 
