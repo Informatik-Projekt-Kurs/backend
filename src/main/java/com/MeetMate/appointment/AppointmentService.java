@@ -2,6 +2,7 @@ package com.MeetMate.appointment;
 
 import com.MeetMate.appointment.sequence.AppointmentSequenceService;
 import com.MeetMate.company.Company;
+import com.MeetMate.enums.AppointmentStatus;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,30 +29,35 @@ public class AppointmentService {
   }
 
   @Transactional
-  public void createAppointment(long companyId, Map<String, Object> appointmentData) throws IllegalAccessException {
+  public void createAppointment(String from, String to, long companyId, long clientId, long assigneeId, String description, String location, AppointmentStatus status) throws IllegalAccessException {
     long appointmentId = appointmentSequenceService.getCurrentValue();
 
     Appointment appointment = new Appointment(appointmentId, companyId);
-    Field[] fields = Appointment.class.getDeclaredFields();
-    for(Field field : fields) {
-      field.setAccessible(true);
-      field.set(appointment, appointmentData.get(field.getName()));
-    }
+    if(from != null && !from.isEmpty()) appointment.setFrom(from);
+    if(to != null && !to.isEmpty()) appointment.setTo(to);
+    if(clientId != 0) appointment.setClientId(clientId);
+    if(assigneeId != 0) appointment.setAssigneeId(assigneeId);
+    if(description != null && !description.isEmpty()) appointment.setDescription(description);
+    if(location != null && !location.isEmpty()) appointment.setLocation(location);
+    if(status != null) appointment.setStatus(status);
 
     appointmentRepository.save(appointment);
     appointmentSequenceService.incrementId();
   }
 
   @Transactional
-  public void editAppointment(long appointmentId, Map<String, Object> appointmentData) throws IllegalAccessException {
+  public void editAppointment(long appointmentId, String from, String to, long clientId, long assigneeId, String description, String location, AppointmentStatus status) throws IllegalAccessException {
     Query query = new Query(Criteria.where("appointmentId").is(appointmentId));
     Update update = new Update();
 
-    Field[] fields = Appointment.class.getDeclaredFields();
-    for(Field field : fields) {
-      field.setAccessible(true);
-      update.set(field.getName(), appointmentData.get(field.getName()));
-    }
+    if(from != null && !from.isEmpty()) update.set("from", from);
+    if(to != null && !to.isEmpty()) update.set("to", to);
+    if(clientId != 0) update.set("clientId", clientId);
+    if(assigneeId != 0) update.set("assigneeId", assigneeId);
+    if(description != null && !description.isEmpty()) update.set("description", description);
+    if(location != null && !location.isEmpty()) update.set("location", location);
+    if(status != null) update.set("status", status);
+
 
     mongoTemplate.updateFirst(query, update, Company.class);
   }

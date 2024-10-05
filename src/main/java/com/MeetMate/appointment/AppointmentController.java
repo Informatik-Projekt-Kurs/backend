@@ -1,5 +1,6 @@
 package com.MeetMate.appointment;
 
+import com.MeetMate.enums.AppointmentStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.InaccessibleObjectException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -51,18 +55,7 @@ public class AppointmentController {
       @Argument String status
   ) {
     try {
-      Map<String, Object> appointmentData = Map.of(
-          "from", from,
-          "to", to,
-          "clientId", clientId,
-          "assigneeId", assigneeId,
-//            "prompt", Select Prompt → f.E. medical industry: Untersuchung, Operation);
-          "description", description,
-          "location", location,
-          "status", status
-      );
-
-      appointmentService.createAppointment(companyId, appointmentData);
+      appointmentService.createAppointment(from, to, companyId, clientId, assigneeId, description, location, AppointmentStatus.valueOf(status));
       return ResponseEntity.ok().build();
 
     } catch (Throwable t) {
@@ -87,18 +80,7 @@ public class AppointmentController {
       @Argument String status) {
 
     try {
-      Map<String, Object> appointmentData = Map.of(
-          "from", from,
-          "to", to,
-          "clientId", clientId,
-          "assigneeId", assigneeId,
-          //  "prompt", Select Prompt → f.E. medical industry: Untersuchung, Operation);
-          "description", description,
-          "location", location,
-          "status", status
-      );
-
-      appointmentService.editAppointment(id, appointmentData);
+      appointmentService.editAppointment(id, from, to, clientId, assigneeId, description, location, AppointmentStatus.valueOf(status));
       return ResponseEntity.ok().build();
 
     } catch (Throwable t) {
