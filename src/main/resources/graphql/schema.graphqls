@@ -6,6 +6,7 @@ type Query {
     getCompany(id: ID!): Company
 
     #Appointment Queries
+    getAppointment(id: ID!): Appointment
 }
 
 type Mutation {
@@ -27,6 +28,17 @@ type Mutation {
     deleteCompany: String
 
     #Appointment Mutations
+    createAppointment(
+        from: String,
+        to: String,
+        companyID: ID!,
+        clientID: ID!,
+        assigneeID: ID,
+        # Select Prompt → f.E. medical industry: Untersuchung, Operation
+        description: String,
+        location: String
+        appointmentStatus: String
+    ): String
 }
 
 type Company {
@@ -40,22 +52,13 @@ type Company {
 
 type Appointment {
     id: ID
-    from: DateTime
-    to: DateTime
-    companyI: ID
+    from: String
+    to: String
+    companyID: ID
     clientID: ID
     assigneeID: ID
     # Select Prompt → f.E. medical industry: Untersuchung, Operation
     description: String
     location: String
     AppointmentStatus: String
-}
-
-type DateTime {
-    year: Int
-    month: Int
-    day: Int
-    hour: Int
-    minute: Int
-    second: Int
 }

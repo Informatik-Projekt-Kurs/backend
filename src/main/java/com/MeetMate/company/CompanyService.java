@@ -1,6 +1,6 @@
 package com.MeetMate.company;
 
-import com.MeetMate.company.sequence.SequenceService;
+import com.MeetMate.company.sequence.CompanySequenceService;
 import com.MeetMate.enums.BusinessType;
 import com.MeetMate.enums.UserRole;
 import com.MeetMate.security.JwtService;
@@ -25,7 +25,7 @@ public class CompanyService {
   private final UserRepository userRepository;
   private final CompanyRepository companyRepository;
   private final MongoTemplate mongoTemplate;
-  private final SequenceService sequenceService;
+  private final CompanySequenceService companySequenceService;
   private final JwtService jwtService;
 
   public Company getCompany(long id) throws IllegalArgumentException {
@@ -35,7 +35,7 @@ public class CompanyService {
 
   @Transactional
   public void createCompany(String companyName, String ownerEmail, String ownerName, String ownerPassword) {
-    long companyId = sequenceService.getCurrentValue();
+    long companyId = companySequenceService.getCurrentValue();
     //Create the company owner
     MultiValueMap<String, String> ownerData = new LinkedMultiValueMap<>();
     ownerData.add("email", ownerEmail);
@@ -47,7 +47,7 @@ public class CompanyService {
     userController.registerNewUser(ownerData);
 
     companyRepository.save(new Company(companyId, companyName, ownerEmail));
-    sequenceService.incrementId();
+    companySequenceService.incrementId();
   }
 
   @Transactional

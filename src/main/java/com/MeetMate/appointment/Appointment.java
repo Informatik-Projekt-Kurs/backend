@@ -21,4 +21,10 @@ public class Appointment {
   String description;
   String location;
   AppointmentStatus status;
+
+  public Appointment(long id, long companyID, long clientID) {
+    this.id = id;
+    this.companyID = companyID;
+    this.clientID = clientID;
+  }
 }
