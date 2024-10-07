@@ -4,6 +4,7 @@ import com.MeetMate.enums.AppointmentStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
@@ -25,9 +26,11 @@ public class AppointmentController {
   private final AppointmentService appointmentService;
 
   @QueryMapping
-  public Appointment getAppointment(@Argument long id) {
+  public Appointment getAppointment(
+      @ContextValue String token,
+      @Argument long id) {
     try {
-      return appointmentService.getAppointment(id);
+      return appointmentService.getAppointment(token, id);
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
@@ -69,6 +72,7 @@ public class AppointmentController {
 
   @MutationMapping
   public ResponseEntity<?> editAppointment(
+      @ContextValue String token,
       @Argument long id,
       @Argument String from,
       @Argument String to,
@@ -80,7 +84,28 @@ public class AppointmentController {
       @Argument String status) {
 
     try {
-      appointmentService.editAppointment(id, from, to, clientId, assigneeId, description, location, AppointmentStatus.valueOf(status));
+      appointmentService.editAppointment(token, id, from, to, clientId, assigneeId, description, location, AppointmentStatus.valueOf(status));
+      return ResponseEntity.ok().build();
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
+    }
+  }
+
+  @MutationMapping
+  public ResponseEntity<?> deleteAppointment(
+      @ContextValue String token,
+      @Argument long id) {
+
+    try {
+      appointmentService.deleteAppointment(token, id);
       return ResponseEntity.ok().build();
 
     } catch (Throwable t) {

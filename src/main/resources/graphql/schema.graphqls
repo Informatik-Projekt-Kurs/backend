@@ -51,6 +51,10 @@ type Mutation {
         location: String,
         status: String
     ): String
+
+    deleteAppointment(
+        id: ID!
+    ): String
 }
 
 type Company {
