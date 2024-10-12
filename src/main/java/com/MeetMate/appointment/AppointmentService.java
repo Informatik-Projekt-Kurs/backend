@@ -4,7 +4,6 @@ import com.MeetMate.appointment.sequence.AppointmentSequenceService;
 import com.MeetMate.company.Company;
 import com.MeetMate.company.CompanyRepository;
 import com.MeetMate.enums.AppointmentStatus;
-import com.MeetMate.enums.UserRole;
 import com.MeetMate.security.JwtService;
 import com.MeetMate.user.User;
 import com.MeetMate.user.UserRepository;
@@ -16,9 +15,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
-
-import java.lang.reflect.Field;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -32,14 +28,14 @@ public class AppointmentService {
   private final CompanyRepository companyRepository;
 
   public Appointment getAppointment(String token, long appointmentId) {
-    if(!checkIfUserInAppointment(token, appointmentId))
+    if (userNotInAppointment(token, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
     return appointmentRepository.findAppointmentById(appointmentId)
         .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
   }
 
   @Transactional
-  public void createAppointment(String from, String to, long companyId, long clientId, long assigneeId, String description, String location, AppointmentStatus status) throws IllegalAccessException {
+  public void createAppointment(String from, String to, long companyId, long clientId, long assigneeId, String description, String location, AppointmentStatus status) {
     long appointmentId = appointmentSequenceService.getCurrentValue();
 
     Appointment appointment = new Appointment(appointmentId, companyId);
@@ -57,7 +53,7 @@ public class AppointmentService {
 
   @Transactional
   public void editAppointment(String token, long appointmentId, String from, String to, long clientId, long assigneeId, String description, String location, AppointmentStatus status) throws IllegalAccessException {
-    if(!checkIfUserInAppointment(token, appointmentId))
+    if (userNotInAppointment(token, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
     Query query = new Query(Criteria.where("appointmentId").is(appointmentId));
     Update update = new Update();
@@ -76,7 +72,7 @@ public class AppointmentService {
 
   @Transactional
   public void deleteAppointment(String token, long appointmentId) {
-    if(!checkIfUserInAppointment(token, appointmentId))
+    if (userNotInAppointment(token, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
     Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
         .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
@@ -84,7 +80,7 @@ public class AppointmentService {
     appointmentRepository.delete(appointment);
   }
 
-  private boolean checkIfUserInAppointment(String token, long appointmentId) throws IllegalArgumentException {
+  private boolean userNotInAppointment(String token, long appointmentId) throws IllegalArgumentException {
     String userEmail = jwtService.extractUserEmail(token);
     User user = userRepository.findUserByEmail(userEmail)
         .orElseThrow(() -> new EntityNotFoundException("User not found!"));
@@ -94,17 +90,17 @@ public class AppointmentService {
     switch (user.getRole()) {
       case COMPANY_OWNER, COMPANY_MEMBER -> {
         if (appointment.getCompanyId() == user.getAssociatedCompany())
-          return true;
+          return false;
       }
       case CLIENT -> {
         if (appointment.getClientId() == user.getId())
-          return true;
+          return false;
       }
       default -> {
         throw new IllegalStateException("Role of user not found!");
       }
     }
-    return false;
+    return true;
   }
 
 }

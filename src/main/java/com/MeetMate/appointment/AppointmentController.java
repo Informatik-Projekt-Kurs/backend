@@ -28,7 +28,8 @@ public class AppointmentController {
   @QueryMapping
   public Appointment getAppointment(
       @ContextValue String token,
-      @Argument long id) {
+      @Argument long id
+  ) {
     try {
       return appointmentService.getAppointment(token, id);
 
@@ -63,8 +64,6 @@ public class AppointmentController {
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
-      if (tc == InaccessibleObjectException.class)
-        return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body("message: " + t.getMessage());
 
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
@@ -92,6 +91,9 @@ public class AppointmentController {
       if (tc == EntityNotFoundException.class)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
+      if (tc == IllegalStateException.class)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
+
       if (tc == IllegalArgumentException.class)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
 
@@ -110,8 +112,9 @@ public class AppointmentController {
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
-      if (tc == EntityNotFoundException.class)
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalStateException.class)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
 
       if (tc == IllegalArgumentException.class)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
