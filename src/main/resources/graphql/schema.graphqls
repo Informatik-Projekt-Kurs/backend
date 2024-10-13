@@ -5,6 +5,8 @@ type Query {
     #Company Queries
     getCompany(id: ID!): Company
 
+    getMember(memberId: ID!): String
+
     #Appointment Queries
     getAppointment(id: ID!): Appointment
 }

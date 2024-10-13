@@ -27,9 +27,8 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
 
-  public GetResponse getUserByEmail(String token) {
+  public GetResponse getUser(String token) {
     String email = jwtService.extractUserEmail(token);
-
     User user = userRepository.findUserByEmail(email)
         .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 

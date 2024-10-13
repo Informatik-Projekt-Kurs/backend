@@ -1,5 +1,8 @@
 package com.MeetMate.company;
 
+import com.MeetMate.enums.UserRole;
+import com.MeetMate.response.GetResponse;
+import com.MeetMate.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -75,7 +78,7 @@ public class CompanyController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
       if (tc == IllegalArgumentException.class)
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
 
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
@@ -100,28 +103,45 @@ public class CompanyController {
     }
   }
 
-  @MutationMapping
-  public ResponseEntity<?> addMember(
+  ////////////////MEMBER MANAGEMENT////////////////
+
+  @QueryMapping
+  public GetResponse getMember(
       @ContextValue String token,
-      @Argument String memberEmail,
-      @Argument String memberName,
-      @Argument String memberPassword) {
+      @Argument long memberId
+  ) {
     token = token.substring(7);
     try {
-      companyService.addMember(token, memberEmail, memberName, memberPassword);
-      return ResponseEntity.ok().build();
+      return companyService.getMember(token, memberId);
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
-
-      if (tc == EntityNotFoundException.class)
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
-
-      if (tc == IllegalArgumentException.class)
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
-
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
+      return null;
     }
   }
 
-}
+    @MutationMapping
+    public ResponseEntity<?> addMember (
+        @ContextValue String token,
+        @Argument String memberEmail,
+        @Argument String memberName,
+        @Argument String memberPassword){
+      token = token.substring(7);
+      try {
+        companyService.addMember(token, memberEmail, memberName, memberPassword);
+        return ResponseEntity.ok().build();
+
+      } catch (Throwable t) {
+        Class<? extends Throwable> tc = t.getClass();
+
+        if (tc == EntityNotFoundException.class)
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+        if (tc == IllegalArgumentException.class)
+          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
+      }
+    }
+
+  }

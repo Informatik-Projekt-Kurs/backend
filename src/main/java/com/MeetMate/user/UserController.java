@@ -25,7 +25,7 @@ public class UserController {
   public ResponseEntity<?> getUser(@RequestHeader(name = "Authorization") String token) {
     token = token.substring(7);
     try {
-      return ResponseEntity.ok(userService.getUserByEmail(token));
+      return ResponseEntity.ok(userService.getUser(token));
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();

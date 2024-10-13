@@ -3,7 +3,9 @@ package com.MeetMate.company;
 import com.MeetMate.company.sequence.CompanySequenceService;
 import com.MeetMate.enums.BusinessType;
 import com.MeetMate.enums.UserRole;
+import com.MeetMate.response.GetResponse;
 import com.MeetMate.security.JwtService;
+import com.MeetMate.user.User;
 import com.MeetMate.user.UserController;
 import com.MeetMate.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -73,6 +75,17 @@ public class CompanyService {
     companyRepository.delete(company);
   }
 
+  public GetResponse getMember(String token, long memberId) {
+    Company company = getCompanyWithToken(token);
+
+    GetResponse member = getMemberById(memberId);
+
+    if (!company.getMemberEmails().contains(member.getEmail()))
+      throw new EntityNotFoundException("Member not found");
+
+    return member;
+  }
+
   @Transactional
   public void addMember(String token, String memberEmail, String memberName, String memberPassword) {
     Company company = getCompanyWithToken(token);
@@ -101,5 +114,19 @@ public class CompanyService {
 
     return companyRepository.findCompanyByOwnerEmail(ownerEmail)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+  }
+
+  public GetResponse getMemberById(long id) {
+    User user = userRepository.findUserById(id)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+
+    return GetResponse.builder()
+        .id(user.getId())
+        .name(user.getName())
+        .created_at(user.getCreatedAt())
+        .email(user.getEmail())
+        .role(user.getRole())
+        .associatedCompany(user.getAssociatedCompany())
+        .build();
   }
 }
