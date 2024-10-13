@@ -36,6 +36,14 @@ public class AppointmentService {
 
   @Transactional
   public void createAppointment(String from, String to, long companyId, long clientId, long assigneeId, String description, String location, AppointmentStatus status) {
+    //Check if IDs are valid
+    if (companyRepository.findCompanyById(companyId).isEmpty())
+      throw new EntityNotFoundException("Company not found");
+    if (clientId != 0 && userRepository.findUserById(clientId).isEmpty())
+      throw new EntityNotFoundException("Client not found");
+    if (assigneeId != 0 && userRepository.findUserById(assigneeId).isEmpty())
+      throw new EntityNotFoundException("Assignee not found");
+
     long appointmentId = appointmentSequenceService.getCurrentValue();
 
     Appointment appointment = new Appointment(appointmentId, companyId);
@@ -55,6 +63,13 @@ public class AppointmentService {
   public void editAppointment(String token, long appointmentId, String from, String to, long clientId, long assigneeId, String description, String location, AppointmentStatus status) throws IllegalAccessException {
     if (userNotInAppointment(token, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
+
+    //Check if IDs are valid
+    if (clientId != 0 && userRepository.findUserById(clientId).isEmpty())
+      throw new EntityNotFoundException("Client not found");
+    if (assigneeId != 0 && userRepository.findUserById(assigneeId).isEmpty())
+      throw new EntityNotFoundException("Assignee not found");
+
     Query query = new Query(Criteria.where("appointmentId").is(appointmentId));
     Update update = new Update();
 
@@ -65,7 +80,6 @@ public class AppointmentService {
     if (description != null && !description.isEmpty()) update.set("description", description);
     if (location != null && !location.isEmpty()) update.set("location", location);
     if (status != null) update.set("status", status);
-
 
     mongoTemplate.updateFirst(query, update, Company.class);
   }
