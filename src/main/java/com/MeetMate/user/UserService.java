@@ -32,17 +32,22 @@ public class UserService {
 
     User user = userRepository.findUserByEmail(email)
         .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
-    ;
 
-    return GetResponse.builder()
+    GetResponse response = GetResponse.builder()
         .id(user.getId())
         .name(user.getName())
         .created_at(user.getCreatedAt())
         .email(user.getEmail())
         .role(user.getRole())
-        .associatedCompany(user.getAssociatedCompany())
-        .subscribedCompanies(user.getSubscribedCompanies())
         .build();
+
+    switch (user.getRole()) {
+      case COMPANY_OWNER, COMPANY_MEMBER -> response.setAssociatedCompany(user.getAssociatedCompany());
+      case CLIENT -> response.setSubscribedCompanies(user.getSubscribedCompanies());
+      default -> throw new IllegalStateException(user.getRole() + " is invalid!");
+    }
+
+    return response;
   }
 
   public List<User> getAllUsers() {
