@@ -73,6 +73,25 @@ public class CompanyService {
     companyRepository.delete(company);
   }
 
+  @Transactional
+  public void addMember(String token, String memberEmail, String memberName, String memberPassword) {
+    Company company = getCompanyWithToken(token);
+
+    MultiValueMap<String, String> memberData = new LinkedMultiValueMap<>();
+    memberData.add("email", memberEmail);
+    memberData.add("name", memberName);
+    memberData.add("password", memberPassword);
+    memberData.add("role", UserRole.COMPANY_MEMBER.toString());
+    memberData.add("associatedCompany", String.valueOf(company.getId()));
+
+    userController.registerNewUser(memberData);
+
+    Query query = new Query(Criteria.where("ownerEmail").is(company.getOwnerEmail()));
+    Update update = new Update();
+    update.set("memberEmails", company.getMemberEmails().add(memberEmail));
+    mongoTemplate.updateFirst(query, update, Company.class);
+  }
+
   private Company getCompanyWithToken(String token) throws IllegalArgumentException {
     String ownerEmail = jwtService.extractUserEmail(token);
     if (userRepository.findUserByEmail(ownerEmail)

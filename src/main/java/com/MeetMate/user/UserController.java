@@ -153,9 +153,11 @@ public class UserController {
     }
   }
 
+  @PutMapping(path = "subscribe")
+  @ResponseBody
   public ResponseEntity<?> subscribeToCompany(
       @RequestHeader(name = "Authorization") String token,
-                                              @RequestParam long companyId
+      @RequestParam long companyId
   ) {
     token = token.substring(7);
     try {

@@ -27,6 +27,12 @@ type Mutation {
 
     deleteCompany: String
 
+    addMember(
+        memberEmail: String!
+        memberName: String!
+        memberPassword: String!
+    ): String
+
     #Appointment Mutations
     createAppointment(
         from: String,

@@ -100,4 +100,28 @@ public class CompanyController {
     }
   }
 
+  @MutationMapping
+  public ResponseEntity<?> addMember(
+      @ContextValue String token,
+      @Argument String memberEmail,
+      @Argument String memberName,
+      @Argument String memberPassword) {
+    token = token.substring(7);
+    try {
+      companyService.addMember(token, memberEmail, memberName, memberPassword);
+      return ResponseEntity.ok().build();
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
+    }
+  }
+
 }

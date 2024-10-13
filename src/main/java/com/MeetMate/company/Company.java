@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+
 @Document(collection = "companies")
 @Data
 @NoArgsConstructor
@@ -14,7 +16,7 @@ public class Company {
     private String name;
     private String description;
     private BusinessType businessType;
-    private String[] memberEmails;
+    private ArrayList<String> memberEmails;
     @Indexed(unique = true)
     private String ownerEmail;
 
