@@ -16,7 +16,7 @@ public class Company {
     private String name;
     private String description;
     private BusinessType businessType;
-    private ArrayList<String> memberEmails;
+    private ArrayList<Long> memberIds;
     @Indexed(unique = true)
     private String ownerEmail;
 

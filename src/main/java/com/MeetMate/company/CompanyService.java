@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.util.ArrayList;
+
 @Service
 @RequiredArgsConstructor
 public class CompanyService {
@@ -80,10 +82,21 @@ public class CompanyService {
 
     GetResponse member = getMemberById(memberId);
 
-    if (!company.getMemberEmails().contains(member.getEmail()))
+    if (!company.getMemberIds().contains(member.getId()))
       throw new EntityNotFoundException("Member not found");
 
     return member;
+  }
+
+  public ArrayList<GetResponse> getAllMembers(String token) {
+    Company company = getCompanyWithToken(token);
+
+    ArrayList<GetResponse> members = new ArrayList<>();
+    for (Long memberId : company.getMemberIds()) {
+      GetResponse member = getMemberById(memberId);
+      members.add(member);
+    }
+    return members;
   }
 
   @Transactional
@@ -101,7 +114,10 @@ public class CompanyService {
 
     Query query = new Query(Criteria.where("ownerEmail").is(company.getOwnerEmail()));
     Update update = new Update();
-    update.set("memberEmails", company.getMemberEmails().add(memberEmail));
+    update.set("memberEmails", company.getMemberIds().add(
+        userRepository.findUserByEmail(memberEmail)
+            .orElseThrow(() -> new IllegalStateException("Member could not be created correctly!"))
+            .getId()));
     mongoTemplate.updateFirst(query, update, Company.class);
   }
 
@@ -116,7 +132,7 @@ public class CompanyService {
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
   }
 
-  public GetResponse getMemberById(long id) {
+  private GetResponse getMemberById(long id) {
     User user = userRepository.findUserById(id)
         .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 

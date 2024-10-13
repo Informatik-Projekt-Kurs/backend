@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.InaccessibleObjectException;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping(path = "api/company")
@@ -120,6 +121,19 @@ public class CompanyController {
     }
   }
 
+  public ArrayList<GetResponse> getAllMembers(
+      @ContextValue String token
+  ) {
+    token = token.substring(7);
+    try {
+      return companyService.getAllMembers(token);
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+      return null;
+    }
+  }
+
     @MutationMapping
     public ResponseEntity<?> addMember (
         @ContextValue String token,
@@ -139,6 +153,9 @@ public class CompanyController {
 
         if (tc == IllegalArgumentException.class)
           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
+
+        if (tc == IllegalStateException.class)
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
       }
