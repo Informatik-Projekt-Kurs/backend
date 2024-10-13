@@ -152,4 +152,27 @@ public class UserController {
           .body("type: " + tc + "\nmessage: " + t.getMessage());
     }
   }
+
+  public ResponseEntity<?> subscribeToCompany(
+      @RequestHeader(name = "Authorization") String token,
+                                              @RequestParam long companyId
+  ) {
+    token = token.substring(7);
+    try {
+      userService.subscribeToCompany(token, companyId);
+      return ResponseEntity.ok().build();
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
+    }
+  }
 }

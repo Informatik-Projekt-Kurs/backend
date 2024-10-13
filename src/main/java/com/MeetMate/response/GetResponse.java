@@ -1,7 +1,10 @@
 package com.MeetMate.response;
 
 import com.MeetMate.enums.UserRole;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +19,6 @@ public class GetResponse {
   LocalDate created_at;
   String email;
   UserRole role;
+  long associatedCompany;
+  ArrayList<Long> subscribedCompanies;
 }

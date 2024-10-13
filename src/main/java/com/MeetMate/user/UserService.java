@@ -17,7 +17,6 @@ import org.springframework.util.MultiValueMap;
 
 import javax.naming.NameAlreadyBoundException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,12 +30,9 @@ public class UserService {
   public GetResponse getUserByEmail(String token) {
     String email = jwtService.extractUserEmail(token);
 
-    Optional<User> userOptional = userRepository.findUserByEmail(email);
-
-    User user =
-        userRepository
-            .findUserByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+    User user = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+    ;
 
     return GetResponse.builder()
         .id(user.getId())
@@ -44,6 +40,8 @@ public class UserService {
         .created_at(user.getCreatedAt())
         .email(user.getEmail())
         .role(user.getRole())
+        .associatedCompany(user.getAssociatedCompany())
+        .subscribedCompanies(user.getSubscribedCompanies())
         .build();
   }
 
@@ -158,11 +156,22 @@ public class UserService {
   @Transactional
   public void deleteUser(String token) {
     String email = jwtService.extractUserEmail(token);
-    User user =
-        userRepository
-            .findUserByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
+    User user = userRepository
+        .findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
 
     userRepository.deleteByEmail(email);
+  }
+
+  @Transactional
+  public void subscribeToCompany(String token, long companyId) {
+    String email = jwtService.extractUserEmail(token);
+    User user = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
+
+    if (user.getRole() != UserRole.CLIENT)
+      throw new IllegalArgumentException("Only CLIENT users can subscribe to companies");
+
+    user.getSubscribedCompanies().add(companyId);
   }
 }
