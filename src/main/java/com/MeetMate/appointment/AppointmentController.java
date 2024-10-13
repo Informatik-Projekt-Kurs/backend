@@ -12,12 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.lang.reflect.InaccessibleObjectException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.HashMap;
-import java.util.Map;
-
 @Controller
 @RequestMapping(path = "api/appointment")
 @RequiredArgsConstructor
