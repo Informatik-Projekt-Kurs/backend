@@ -30,9 +30,9 @@ public class AppointmentController {
       @ContextValue String token,
       @Argument long id
   ) {
+    token = token.substring(7);
     try {
       return appointmentService.getAppointment(token, id);
-
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
       return null;
@@ -83,8 +83,9 @@ public class AppointmentController {
 //      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
       @Argument String description,
       @Argument String location,
-      @Argument String status) {
-
+      @Argument String status
+  ) {
+    token = token.substring(7);
     try {
       appointmentService.editAppointment(token, id, from, to, clientId, assigneeId, description, location, AppointmentStatus.valueOf(status));
       return ResponseEntity.ok().build();
@@ -107,8 +108,9 @@ public class AppointmentController {
   @MutationMapping
   public ResponseEntity<?> deleteAppointment(
       @ContextValue String token,
-      @Argument long id) {
-
+      @Argument long id
+  ) {
+    token = token.substring(7);
     try {
       appointmentService.deleteAppointment(token, id);
       return ResponseEntity.ok().build();
