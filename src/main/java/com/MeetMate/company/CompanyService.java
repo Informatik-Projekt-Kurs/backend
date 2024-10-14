@@ -121,6 +121,16 @@ public class CompanyService {
     mongoTemplate.updateFirst(query, update, Company.class);
   }
 
+  @Transactional
+  public void deleteMember(String token, long memberId) throws IllegalAccessException {
+    Company company = getCompanyWithToken(token);
+
+    if (!isCompanyMember(company, memberId))
+      throw new IllegalAccessException("Not a member of the company");
+
+    userRepository.deleteById(memberId);
+  }
+
   private Company getCompanyWithToken(String token) throws IllegalArgumentException {
     String ownerEmail = jwtService.extractUserEmail(token);
     if (userRepository.findUserByEmail(ownerEmail)
@@ -130,6 +140,10 @@ public class CompanyService {
 
     return companyRepository.findCompanyByOwnerEmail(ownerEmail)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+  }
+
+  private boolean isCompanyMember(Company company, long memberId) {
+    return company.getMemberIds().contains(memberId);
   }
 
   private GetResponse getMemberById(long id) {

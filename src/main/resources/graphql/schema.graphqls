@@ -35,6 +35,10 @@ type Mutation {
         memberPassword: String!
     ): String
 
+    deleteMember(
+        memberId: ID!
+    ): String
+
     #Appointment Mutations
     createAppointment(
         from: String,

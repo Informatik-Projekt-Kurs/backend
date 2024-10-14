@@ -1,5 +1,6 @@
 package com.MeetMate.user;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findUserById(Long id);
 
     void deleteByEmail(String email);
+
+    void deleteById(@NotNull Long id);
 }

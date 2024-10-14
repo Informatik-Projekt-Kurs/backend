@@ -134,31 +134,55 @@ public class CompanyController {
     }
   }
 
-    @MutationMapping
-    public ResponseEntity<?> addMember (
-        @ContextValue String token,
-        @Argument String memberEmail,
-        @Argument String memberName,
-        @Argument String memberPassword){
-      token = token.substring(7);
-      try {
-        companyService.addMember(token, memberEmail, memberName, memberPassword);
-        return ResponseEntity.ok().build();
+  @MutationMapping
+  public ResponseEntity<?> addMember(
+      @ContextValue String token,
+      @Argument String memberEmail,
+      @Argument String memberName,
+      @Argument String memberPassword) {
+    token = token.substring(7);
+    try {
+      companyService.addMember(token, memberEmail, memberName, memberPassword);
+      return ResponseEntity.ok().build();
 
-      } catch (Throwable t) {
-        Class<? extends Throwable> tc = t.getClass();
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
 
-        if (tc == EntityNotFoundException.class)
-          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
-        if (tc == IllegalArgumentException.class)
-          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
 
-        if (tc == IllegalStateException.class)
-          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
-
+      if (tc == IllegalStateException.class)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
-      }
-    }
 
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
+    }
   }
+
+  @MutationMapping
+  public ResponseEntity<?> deleteMember(
+      @ContextValue String token,
+      @Argument long memberId
+  ) {
+    token = token.substring(7);
+    try {
+      companyService.deleteMember(token, memberId);
+      return ResponseEntity.ok().build();
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
+
+      if (tc == IllegalAccessException.class)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
+    }
+  }
+}
