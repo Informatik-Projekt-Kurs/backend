@@ -31,13 +31,29 @@ type Mutation {
     createAppointment(
         from: String,
         to: String,
-        companyID: ID!,
-        clientID: ID!,
-        assigneeID: ID,
-        # Select Prompt → f.E. medical industry: Untersuchung, Operation
+        companyId: ID!,
+        clientId: ID,
+        assigneeId: ID,
+#
         description: String,
-        location: String
-        appointmentStatus: String
+        location: String,
+        status: String
+    ): String
+
+    editAppointment(
+        id: ID!,
+        from: String,
+        to: String,
+        clientId: ID,
+        assigneeId: ID,
+
+        description: String,
+        location: String,
+        status: String
+    ): String
+
+    deleteAppointment(
+        id: ID!
     ): String
 }
 
@@ -54,11 +70,11 @@ type Appointment {
     id: ID
     from: String
     to: String
-    companyID: ID
-    clientID: ID
-    assigneeID: ID
+    companyId: ID
+    clientId: ID
+    assigneeId: ID
     # Select Prompt → f.E. medical industry: Untersuchung, Operation
     description: String
     location: String
-    AppointmentStatus: String
+    Status: String
 }

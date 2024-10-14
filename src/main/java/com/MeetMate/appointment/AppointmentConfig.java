@@ -10,7 +10,6 @@
 //
 //  @Bean
 //  public CommandLineRunner run(AppointmentRepository appointmentRepository) throws Exception {
-//  System.out.println("Yeehaaaa");
 //    return args -> {
 //      Appointment appointment = new Appointment();
 //      appointment.setId(1L);
