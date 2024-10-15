@@ -93,12 +93,13 @@ public class CompanyService {
 
   public ArrayList<GetResponse> getAllMembers(String token) {
     Company company = getCompanyWithToken(token);
-
+    System.out.println(company.toString());
     ArrayList<GetResponse> members = new ArrayList<>();
     for (Long memberId : company.getMemberIds()) {
       GetResponse member = getMemberById(memberId);
       members.add(member);
     }
+    System.out.println(members.toString());
     return members;
   }
 

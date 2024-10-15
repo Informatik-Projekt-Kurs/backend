@@ -7,7 +7,7 @@ type Query {
 
     getMember(memberId: ID!): GetResponse
 
-    getAllMembers: GetResponse
+    getAllMembers: [GetResponse]
 
     #Appointment Queries
     getAppointment(id: ID!): Appointment
@@ -94,7 +94,7 @@ type Appointment {
 }
 
 type GetResponse {
-    id: ID!
+    id: ID
     name: String
     created_at: String
     email: String
