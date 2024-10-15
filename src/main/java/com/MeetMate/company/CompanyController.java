@@ -31,7 +31,7 @@ public class CompanyController {
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
-      return new Company(-1, "error", "error");
+      return new Company(-1, "error", "error", -1);
 
 //            if (tc == EntityNotFoundException.class)
 //                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
@@ -113,14 +113,16 @@ public class CompanyController {
   ) {
     token = token.substring(7);
     try {
-      return companyService.getMember(token, memberId);
-
+      GetResponse g = companyService.getMember(token, memberId);
+      System.out.println(g.toString());
+      return g;
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
       return null;
     }
   }
 
+  @QueryMapping
   public ArrayList<GetResponse> getAllMembers(
       @ContextValue String token
   ) {

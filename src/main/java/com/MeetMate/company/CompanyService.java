@@ -49,8 +49,11 @@ public class CompanyService {
     ownerData.add("associatedCompany", String.valueOf(companyId));
 
     userController.registerNewUser(ownerData);
+    long ownerId = userRepository.findUserByEmail(ownerEmail)
+        .orElseThrow(() -> new IllegalStateException("Owner could not be created correctly!"))
+        .getId();
 
-    companyRepository.save(new Company(companyId, companyName, ownerEmail));
+    companyRepository.save(new Company(companyId, companyName, ownerEmail, ownerId));
     companySequenceService.incrementId();
   }
 
@@ -114,10 +117,12 @@ public class CompanyService {
 
     Query query = new Query(Criteria.where("ownerEmail").is(company.getOwnerEmail()));
     Update update = new Update();
-    update.set("memberEmails", company.getMemberIds().add(
-        userRepository.findUserByEmail(memberEmail)
-            .orElseThrow(() -> new IllegalStateException("Member could not be created correctly!"))
-            .getId()));
+    ArrayList<Long> a = company.getMemberIds();
+    a.add(userRepository.findUserByEmail(memberEmail)
+        .orElseThrow(() -> new IllegalStateException("Member could not be created correctly!"))
+        .getId());
+    update.set("memberIds", a);
+
     mongoTemplate.updateFirst(query, update, Company.class);
   }
 

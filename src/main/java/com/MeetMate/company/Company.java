@@ -20,11 +20,13 @@ public class Company {
     @Indexed(unique = true)
     private String ownerEmail;
 
-    public Company(long id,String name, String ownerEmail) {
+    public Company(long id,String name, String ownerEmail, long ownerId) {
         this.id = id;
         this.name = name;
         this.ownerEmail = ownerEmail;
         this.description = "";
         this.businessType = null;
+        this.memberIds = new ArrayList<>();
+        this.memberIds.add(ownerId);
     }
 }

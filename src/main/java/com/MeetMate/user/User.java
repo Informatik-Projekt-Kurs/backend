@@ -40,6 +40,7 @@ public class User implements UserDetails {
     this.email = email;
     this.password = password;
     this.createdAt = LocalDate.now();
+    subscribedCompanies = new ArrayList<>();
   }
 
   @Experimentational
