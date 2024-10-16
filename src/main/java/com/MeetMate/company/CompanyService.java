@@ -3,7 +3,9 @@ package com.MeetMate.company;
 import com.MeetMate.company.sequence.CompanySequenceService;
 import com.MeetMate.enums.BusinessType;
 import com.MeetMate.enums.UserRole;
+import com.MeetMate.response.GetResponse;
 import com.MeetMate.security.JwtService;
+import com.MeetMate.user.User;
 import com.MeetMate.user.UserController;
 import com.MeetMate.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,6 +18,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -45,8 +49,11 @@ public class CompanyService {
     ownerData.add("associatedCompany", String.valueOf(companyId));
 
     userController.registerNewUser(ownerData);
+    long ownerId = userRepository.findUserByEmail(ownerEmail)
+        .orElseThrow(() -> new IllegalStateException("Owner could not be created correctly!"))
+        .getId();
 
-    companyRepository.save(new Company(companyId, companyName, ownerEmail));
+    companyRepository.save(new Company(companyId, companyName, ownerEmail, ownerId));
     companySequenceService.incrementId();
   }
 
@@ -73,6 +80,63 @@ public class CompanyService {
     companyRepository.delete(company);
   }
 
+  public GetResponse getMember(String token, long memberId) {
+    Company company = getCompanyWithToken(token);
+
+    GetResponse member = getMemberById(memberId);
+
+    if (!company.getMemberIds().contains(member.getId()))
+      throw new EntityNotFoundException("Member not found");
+
+    return member;
+  }
+
+  public ArrayList<GetResponse> getAllMembers(String token) {
+    Company company = getCompanyWithToken(token);
+    System.out.println(company.toString());
+    ArrayList<GetResponse> members = new ArrayList<>();
+    for (Long memberId : company.getMemberIds()) {
+      GetResponse member = getMemberById(memberId);
+      members.add(member);
+    }
+    System.out.println(members.toString());
+    return members;
+  }
+
+  @Transactional
+  public void addMember(String token, String memberEmail, String memberName, String memberPassword) {
+    Company company = getCompanyWithToken(token);
+
+    MultiValueMap<String, String> memberData = new LinkedMultiValueMap<>();
+    memberData.add("email", memberEmail);
+    memberData.add("name", memberName);
+    memberData.add("password", memberPassword);
+    memberData.add("role", UserRole.COMPANY_MEMBER.toString());
+    memberData.add("associatedCompany", String.valueOf(company.getId()));
+
+    userController.registerNewUser(memberData);
+
+    Query query = new Query(Criteria.where("ownerEmail").is(company.getOwnerEmail()));
+    Update update = new Update();
+    ArrayList<Long> a = company.getMemberIds();
+    a.add(userRepository.findUserByEmail(memberEmail)
+        .orElseThrow(() -> new IllegalStateException("Member could not be created correctly!"))
+        .getId());
+    update.set("memberIds", a);
+
+    mongoTemplate.updateFirst(query, update, Company.class);
+  }
+
+  @Transactional
+  public void deleteMember(String token, long memberId) throws IllegalAccessException {
+    Company company = getCompanyWithToken(token);
+
+    if (!isCompanyMember(company, memberId))
+      throw new IllegalAccessException("Not a member of the company");
+
+    userRepository.deleteById(memberId);
+  }
+
   private Company getCompanyWithToken(String token) throws IllegalArgumentException {
     String ownerEmail = jwtService.extractUserEmail(token);
     if (userRepository.findUserByEmail(ownerEmail)
@@ -82,5 +146,23 @@ public class CompanyService {
 
     return companyRepository.findCompanyByOwnerEmail(ownerEmail)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+  }
+
+  private boolean isCompanyMember(Company company, long memberId) {
+    return company.getMemberIds().contains(memberId);
+  }
+
+  private GetResponse getMemberById(long id) {
+    User user = userRepository.findUserById(id)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+
+    return GetResponse.builder()
+        .id(user.getId())
+        .name(user.getName())
+        .created_at(user.getCreatedAt())
+        .email(user.getEmail())
+        .role(user.getRole())
+        .associatedCompany(user.getAssociatedCompany())
+        .build();
   }
 }

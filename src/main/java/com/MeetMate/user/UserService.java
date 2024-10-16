@@ -17,7 +17,6 @@ import org.springframework.util.MultiValueMap;
 
 import javax.naming.NameAlreadyBoundException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,23 +27,26 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
 
-  public GetResponse getUserByEmail(String token) {
+  public GetResponse getUser(String token) {
     String email = jwtService.extractUserEmail(token);
+    User user = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-    Optional<User> userOptional = userRepository.findUserByEmail(email);
-
-    User user =
-        userRepository
-            .findUserByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
-
-    return GetResponse.builder()
+    GetResponse response = GetResponse.builder()
         .id(user.getId())
         .name(user.getName())
         .created_at(user.getCreatedAt())
         .email(user.getEmail())
         .role(user.getRole())
         .build();
+
+    switch (user.getRole()) {
+      case COMPANY_OWNER, COMPANY_MEMBER -> response.setAssociatedCompany(user.getAssociatedCompany());
+      case CLIENT -> response.setSubscribedCompanies(user.getSubscribedCompanies());
+      default -> throw new IllegalStateException(user.getRole() + " is invalid!");
+    }
+
+    return response;
   }
 
   public List<User> getAllUsers() {
@@ -158,11 +160,22 @@ public class UserService {
   @Transactional
   public void deleteUser(String token) {
     String email = jwtService.extractUserEmail(token);
-    User user =
-        userRepository
-            .findUserByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
+    User user = userRepository
+        .findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
 
     userRepository.deleteByEmail(email);
+  }
+
+  @Transactional
+  public void subscribeToCompany(String token, long companyId) {
+    String email = jwtService.extractUserEmail(token);
+    User user = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
+
+    if (user.getRole() != UserRole.CLIENT)
+      throw new IllegalArgumentException("Only CLIENT users can subscribe to companies");
+
+    user.getSubscribedCompanies().add(companyId);
   }
 }

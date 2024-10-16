@@ -9,10 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -32,7 +29,7 @@ public class User implements UserDetails {
   private String refreshToken;
   // bool verified
   private long associatedCompany;
-  private long[] subscribedCompanies;
+  private ArrayList<Long> subscribedCompanies;
 
   public User() {}
 
@@ -43,6 +40,13 @@ public class User implements UserDetails {
     this.email = email;
     this.password = password;
     this.createdAt = LocalDate.now();
+    subscribedCompanies = new ArrayList<>();
+  }
+
+  @Experimentational
+  public User(String email, String password) {
+    this.email = email;
+    this.password = password;
   }
 
   public User(String name, String email, String password, UserRole role) {
@@ -51,11 +55,6 @@ public class User implements UserDetails {
     this.password = password;
     this.createdAt = LocalDate.now();
     this.role = role;
-  }
-  @Experimentational
-  public User(String email, String password) {
-    this.email = email;
-    this.password = password;
   }
 
   public Map<String, Object> generateMap() {

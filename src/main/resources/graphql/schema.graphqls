@@ -5,6 +5,10 @@ type Query {
     #Company Queries
     getCompany(id: ID!): Company
 
+    getMember(memberId: ID!): GetResponse
+
+    getAllMembers: [GetResponse]
+
     #Appointment Queries
     getAppointment(id: ID!): Appointment
 }
@@ -26,6 +30,16 @@ type Mutation {
     ): String
 
     deleteCompany: String
+
+    addMember(
+        memberEmail: String!
+        memberName: String!
+        memberPassword: String!
+    ): String
+
+    deleteMember(
+        memberId: ID!
+    ): String
 
     #Appointment Mutations
     createAppointment(
@@ -62,7 +76,7 @@ type Company {
     name: String
     description: String
     businessType: String
-    memberEmails: [String]
+    memberIds: [ID]
     ownerEmail: String
 }
 
@@ -77,4 +91,14 @@ type Appointment {
     description: String
     location: String
     Status: String
+}
+
+type GetResponse {
+    id: ID
+    name: String
+    created_at: String
+    email: String
+    role: String
+    associatedCompany: ID
+    subscribedCompanies: [ID]
 }
