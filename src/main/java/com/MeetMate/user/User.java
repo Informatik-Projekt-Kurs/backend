@@ -40,7 +40,6 @@ public class User implements UserDetails {
     this.email = email;
     this.password = password;
     this.createdAt = LocalDate.now();
-    subscribedCompanies = new ArrayList<>();
   }
 
   @Experimentational
@@ -55,6 +54,7 @@ public class User implements UserDetails {
     this.password = password;
     this.createdAt = LocalDate.now();
     this.role = role;
+    subscribedCompanies = new ArrayList<>();
   }
 
   public Map<String, Object> generateMap() {

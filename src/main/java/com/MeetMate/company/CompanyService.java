@@ -118,10 +118,16 @@ public class CompanyService {
 
     Query query = new Query(Criteria.where("ownerEmail").is(company.getOwnerEmail()));
     Update update = new Update();
-    ArrayList<Long> a = company.getMemberIds();
-    a.add(userRepository.findUserByEmail(memberEmail)
+
+    Long memberId = userRepository.findUserByEmail(memberEmail)
         .orElseThrow(() -> new IllegalStateException("Member could not be created correctly!"))
-        .getId());
+        .getId();
+
+    ArrayList<Long> a = company.getMemberIds();
+    if (a.contains(memberId))
+      throw new IllegalStateException("Member already exists");
+
+    a.add(memberId);
     update.set("memberIds", a);
 
     mongoTemplate.updateFirst(query, update, Company.class);
@@ -134,7 +140,18 @@ public class CompanyService {
     if (!isCompanyMember(company, memberId))
       throw new IllegalAccessException("Not a member of the company");
 
-    userRepository.deleteById(memberId);
+    User member = userRepository.findUserById(memberId)
+        .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+
+    userRepository.delete(member);
+
+    Query query = new Query(Criteria.where("ownerEmail").is(company.getOwnerEmail()));
+    Update update = new Update();
+    ArrayList<Long> a = company.getMemberIds();
+    a.remove(memberId);
+    update.set("memberIds", a);
+
+    mongoTemplate.updateFirst(query, update, Company.class);
   }
 
   private Company getCompanyWithToken(String token) throws IllegalArgumentException {
