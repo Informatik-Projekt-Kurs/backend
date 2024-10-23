@@ -1,5 +1,6 @@
 package com.MeetMate.user;
 
+import com.MeetMate.company.CompanyRepository;
 import com.MeetMate.enums.UserRole;
 import com.MeetMate.response.AuthenticationResponse;
 import com.MeetMate.response.GetResponse;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
 import javax.naming.NameAlreadyBoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,6 +28,7 @@ public class UserService {
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
+  private final CompanyRepository companyRepository;
 
   public GetResponse getUser(String token) {
     String email = jwtService.extractUserEmail(token);
@@ -176,6 +179,13 @@ public class UserService {
     if (user.getRole() != UserRole.CLIENT)
       throw new IllegalArgumentException("Only CLIENT users can subscribe to companies");
 
-    user.getSubscribedCompanies().add(companyId);
+    if(user.getSubscribedCompanies().contains(companyId))
+      throw new IllegalArgumentException("User is already subscribed to this company!");
+
+    user.getSubscribedCompanies()
+        .add(companyRepository.findCompanyById(companyId)
+        .orElseThrow(() -> new EntityNotFoundException("Company could not be found!"))
+        .getId()
+    );
   }
 }
