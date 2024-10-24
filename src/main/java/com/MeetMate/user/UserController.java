@@ -148,6 +148,9 @@ public class UserController {
       if (tc == EntityNotFoundException.class)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
+      if (tc == IllegalAccessException.class)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("message: " + t.getMessage());
+
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("type: " + tc + "\nmessage: " + t.getMessage());
     }

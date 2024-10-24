@@ -160,11 +160,14 @@ public class UserService {
   }
 
   @Transactional
-  public void deleteUser(String token) {
+  public void deleteUser(String token) throws IllegalAccessException {
     String email = jwtService.extractUserEmail(token);
     User user = userRepository
         .findUserByEmail(email)
         .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
+    if (user.getRole() == UserRole.COMPANY_OWNER
+        || user.getRole() == UserRole.COMPANY_MEMBER)
+      throw new IllegalAccessException("Company owners and members cannot delete their accounts");
 
     userRepository.deleteByEmail(email);
   }
