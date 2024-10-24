@@ -5,6 +5,7 @@ import com.MeetMate.response.GetResponse;
 import com.MeetMate.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.mapping.Array;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.InaccessibleObjectException;
 import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping(path = "api/company")
@@ -43,6 +45,17 @@ public class CompanyController {
     }
   }
 
+  @QueryMapping
+  public List<Company> getCompanies() {
+    try {
+      return companyService.getCompanies();
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+      return List.of(new Company(-1, "error", "error", -1));
+    }
+
+  }
   @MutationMapping
   public ResponseEntity<?> createCompany(
       @Argument String companyName,

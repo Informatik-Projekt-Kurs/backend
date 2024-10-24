@@ -5,6 +5,8 @@ type Query {
     #Company Queries
     getCompany(id: ID!): Company
 
+    getCompanies: [Company]
+
     getMember(memberId: ID!): GetResponse
 
     getAllMembers: [GetResponse]

@@ -20,6 +20,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +36,10 @@ public class CompanyService {
   public Company getCompany(long id) throws IllegalArgumentException {
     return companyRepository.findCompanyById(id)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+  }
+
+  public List<Company> getCompanies() {
+    return companyRepository.findAll();
   }
 
   @Transactional
