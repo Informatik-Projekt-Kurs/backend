@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
 import javax.naming.NameAlreadyBoundException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -179,13 +178,18 @@ public class UserService {
     if (user.getRole() != UserRole.CLIENT)
       throw new IllegalArgumentException("Only CLIENT users can subscribe to companies");
 
-    if(user.getSubscribedCompanies().contains(companyId))
-      throw new IllegalArgumentException("User is already subscribed to this company!");
+    if (user.getSubscribedCompanies().contains(companyId))
+      user.getSubscribedCompanies()
+          .remove(companyRepository.findCompanyById(companyId)
+              .orElseThrow(() -> new EntityNotFoundException("Company could not be found!"))
+              .getId()
+          );
+    else
+      user.getSubscribedCompanies()
+          .add(companyRepository.findCompanyById(companyId)
+              .orElseThrow(() -> new EntityNotFoundException("Company could not be found!"))
+              .getId()
+          );
 
-    user.getSubscribedCompanies()
-        .add(companyRepository.findCompanyById(companyId)
-        .orElseThrow(() -> new EntityNotFoundException("Company could not be found!"))
-        .getId()
-    );
   }
 }
