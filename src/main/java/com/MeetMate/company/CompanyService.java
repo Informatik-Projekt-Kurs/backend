@@ -44,6 +44,9 @@ public class CompanyService {
 
   @Transactional
   public void createCompany(String companyName, String ownerEmail, String ownerName, String ownerPassword) {
+    if (userRepository.findUserByEmail(ownerEmail).isPresent())
+      throw new IllegalArgumentException("Email already taken");
+
     long companyId = companySequenceService.getCurrentValue();
     //Create the company owner
     MultiValueMap<String, String> ownerData = new LinkedMultiValueMap<>();
@@ -78,7 +81,7 @@ public class CompanyService {
   public void deleteCompany(String token) {
     Company company = getCompanyWithToken(token);
     try {
-      userController.deleteUser(token);
+      userController.deleteUser("Bearer:" + token);
     } catch (Throwable t) {
       return;
     }

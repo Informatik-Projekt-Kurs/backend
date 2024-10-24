@@ -71,6 +71,9 @@ public class CompanyController {
       if (tc == InaccessibleObjectException.class)
         return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body("message: " + t.getMessage());
 
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
+
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
