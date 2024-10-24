@@ -86,6 +86,13 @@ public class CompanyService {
     } catch (Throwable t) {
       throw new MongoTransactionException("Could not delete company owner");
     }
+    
+    try {
+      for (Long memberId : company.getMemberIds())
+        userRepository.deleteById(memberId);
+    } catch (Throwable t) {
+      throw new MongoTransactionException("Could not delete company members");
+    }
     companyRepository.delete(company);
   }
 
