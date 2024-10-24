@@ -6,6 +6,7 @@ import com.MeetMate.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.mapping.Array;
+import org.springframework.data.mongodb.MongoTransactionException;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -115,6 +116,9 @@ public class CompanyController {
 
       if (tc == IllegalArgumentException.class)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == MongoTransactionException.class)
+        return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body("message: " + t.getMessage());
 
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
