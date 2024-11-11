@@ -90,8 +90,14 @@ public class CompanyService {
   }
 
   @Transactional
-  public void editCompany(String token, String companyName, String description, String businessType) {
-    String ownerEmail = getCompanyWithToken(token).getOwnerEmail();
+  public void editCompany(String token, String companyName, String description, String businessType) throws IllegalAccessException {
+    String ownerEmail = jwtService.extractUserEmail(token);
+
+    if (isNotCompanyOwner(ownerEmail))
+      throw new IllegalAccessException("Not a company owner");
+
+    Company company = companyRepository.findCompanyByOwnerEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
     Query query = new Query(Criteria.where("ownerEmail").is(ownerEmail));
     Update update = new Update();
@@ -102,8 +108,15 @@ public class CompanyService {
   }
 
   @Transactional
-  public void deleteCompany(String token) {
-    Company company = getCompanyWithToken(token);
+  public void deleteCompany(String token) throws IllegalAccessException {
+    String ownerEmail = jwtService.extractUserEmail(token);
+
+    if (isNotCompanyOwner(ownerEmail))
+      throw new IllegalAccessException("Not a company owner");
+
+    Company company = companyRepository.findCompanyByOwnerEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+
     try {
       userController.deleteUser("Bearer:" + token);
     } catch (Throwable t) {
@@ -119,8 +132,17 @@ public class CompanyService {
     companyRepository.delete(company);
   }
 
-  public GetResponse getMember(String token, long memberId) {
-    Company company = getCompanyWithToken(token);
+  public GetResponse getMember(String token, long memberId) throws IllegalAccessException {
+    String ownerEmail = jwtService.extractUserEmail(token);
+
+    Company company = companyRepository.findCompanyByOwnerEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+
+    if (isNotCompanyOwner(ownerEmail)
+        && isNotCompanyMember(company, userRepository.findUserByEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("User not found!"))
+        .getId()))
+      throw new IllegalAccessException("Not a company member");
 
     if (isNotCompanyMember(company, memberId))
       throw new EntityNotFoundException("Not a company member!");
@@ -128,8 +150,17 @@ public class CompanyService {
     return getMemberById(memberId);
   }
 
-  public ArrayList<GetResponse> getAllMembers(String token) {
-    Company company = getCompanyWithToken(token);
+  public ArrayList<GetResponse> getAllMembers(String token) throws IllegalAccessException {
+    String ownerEmail = jwtService.extractUserEmail(token);
+
+    Company company = companyRepository.findCompanyByOwnerEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+
+    if (isNotCompanyOwner(ownerEmail)
+        && isNotCompanyMember(company, userRepository.findUserByEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("User not found!"))
+        .getId()))
+      throw new IllegalAccessException("Not a company member");
 
     ArrayList<GetResponse> members = new ArrayList<>();
     for (Long memberId : company.getMemberIds()) {
@@ -140,8 +171,14 @@ public class CompanyService {
   }
 
   @Transactional
-  public void addMember(String token, String memberEmail, String memberName, String memberPassword) {
-    Company company = getCompanyWithToken(token);
+  public void addMember(String token, String memberEmail, String memberName, String memberPassword) throws IllegalAccessException {
+    String ownerEmail = jwtService.extractUserEmail(token);
+
+    if (isNotCompanyOwner(ownerEmail))
+      throw new IllegalAccessException("Not a company owner");
+
+    Company company = companyRepository.findCompanyByOwnerEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
     MultiValueMap<String, String> memberData = new LinkedMultiValueMap<>();
     memberData.add("email", memberEmail);
@@ -171,7 +208,13 @@ public class CompanyService {
 
   @Transactional
   public void deleteMember(String token, long memberId) throws IllegalAccessException {
-    Company company = getCompanyWithToken(token);
+    String ownerEmail = jwtService.extractUserEmail(token);
+
+    if (isNotCompanyOwner(ownerEmail))
+      throw new IllegalAccessException("Not a company owner");
+
+    Company company = companyRepository.findCompanyByOwnerEmail(ownerEmail)
+        .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
     if (isNotCompanyMember(company, memberId))
       throw new IllegalAccessException("Not a member of the company");
@@ -190,15 +233,10 @@ public class CompanyService {
     mongoTemplate.updateFirst(query, update, Company.class);
   }
 
-  private Company getCompanyWithToken(String token) throws IllegalArgumentException {
-    String ownerEmail = jwtService.extractUserEmail(token);
-    if (userRepository.findUserByEmail(ownerEmail)
+  private boolean isNotCompanyOwner(String email) {
+    return userRepository.findUserByEmail(email)
         .orElseThrow(() -> new EntityNotFoundException("User not found!"))
-        .getRole() != UserRole.COMPANY_OWNER)
-      throw new IllegalArgumentException("User is not a company owner");
-
-    return companyRepository.findCompanyByOwnerEmail(ownerEmail)
-        .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+        .getRole() != UserRole.COMPANY_OWNER;
   }
 
   private boolean isNotCompanyMember(Company company, long memberId) {
