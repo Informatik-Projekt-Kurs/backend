@@ -2,10 +2,8 @@ package com.MeetMate.company;
 
 import com.MeetMate.enums.UserRole;
 import com.MeetMate.response.GetResponse;
-import com.MeetMate.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.mapping.Array;
 import org.springframework.data.mongodb.MongoTransactionException;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.ContextValue;
@@ -43,6 +41,19 @@ public class CompanyController {
 //                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
 
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
+    }
+  }
+
+  @QueryMapping
+  public ArrayList<GetResponse> getSubscribers(@Argument long id) {
+    try {
+      return companyService.getSubscribers(id);
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      return (ArrayList<GetResponse>) List.of(
+          new GetResponse(-1, "error", null, "error", UserRole.COMPANY_OWNER, -1, new ArrayList<Long>()));
     }
   }
 

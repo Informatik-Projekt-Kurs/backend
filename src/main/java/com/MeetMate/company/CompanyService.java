@@ -39,6 +39,29 @@ public class CompanyService {
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
   }
 
+  public ArrayList<GetResponse> getSubscribers(long id) {
+    companyRepository.findCompanyById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+
+    ArrayList<GetResponse> response = new ArrayList<>();
+    List<User> subscribers = userRepository.findAll();
+
+    for (User user : subscribers) {
+      if (user.getSubscribedCompanies().contains(id))
+        response.add(GetResponse.builder()
+            .id(user.getId())
+            .name(user.getName())
+            .created_at(user.getCreatedAt())
+            .email(user.getEmail())
+            .role(user.getRole())
+            .associatedCompany(user.getAssociatedCompany())
+            .subscribedCompanies(user.getSubscribedCompanies())
+            .build());
+    }
+
+    return response;
+  }
+
   public List<Company> getCompanies() {
     return companyRepository.findAll();
   }
@@ -86,7 +109,7 @@ public class CompanyService {
     } catch (Throwable t) {
       throw new MongoTransactionException("Could not delete company owner");
     }
-    
+
     try {
       for (Long memberId : company.getMemberIds())
         userRepository.deleteById(memberId);
