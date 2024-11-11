@@ -11,6 +11,7 @@ import com.MeetMate.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.MongoTransactionException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -44,6 +45,9 @@ public class CompanyService {
 
   @Transactional
   public void createCompany(String companyName, String ownerEmail, String ownerName, String ownerPassword) {
+    if (userRepository.findUserByEmail(ownerEmail).isPresent())
+      throw new IllegalArgumentException("Email already taken");
+
     long companyId = companySequenceService.getCurrentValue();
     //Create the company owner
     MultiValueMap<String, String> ownerData = new LinkedMultiValueMap<>();
@@ -68,9 +72,9 @@ public class CompanyService {
 
     Query query = new Query(Criteria.where("ownerEmail").is(ownerEmail));
     Update update = new Update();
-    if (companyName != null) update.set("name", companyName);
-    if (description != null) update.set("description", description);
-    if (businessType != null) update.set("businessType", BusinessType.valueOf(businessType));
+    if (companyName != null && !companyName.isEmpty()) update.set("name", companyName);
+    if (description != null && !description.isEmpty()) update.set("description", description);
+    if (businessType != null && !businessType.isEmpty()) update.set("businessType", BusinessType.valueOf(businessType));
     mongoTemplate.updateFirst(query, update, Company.class);
   }
 
@@ -78,9 +82,16 @@ public class CompanyService {
   public void deleteCompany(String token) {
     Company company = getCompanyWithToken(token);
     try {
-      userController.deleteUser(token);
+      userController.deleteUser("Bearer:" + token);
     } catch (Throwable t) {
-      return;
+      throw new MongoTransactionException("Could not delete company owner");
+    }
+    
+    try {
+      for (Long memberId : company.getMemberIds())
+        userRepository.deleteById(memberId);
+    } catch (Throwable t) {
+      throw new MongoTransactionException("Could not delete company members");
     }
     companyRepository.delete(company);
   }
@@ -88,23 +99,20 @@ public class CompanyService {
   public GetResponse getMember(String token, long memberId) {
     Company company = getCompanyWithToken(token);
 
-    GetResponse member = getMemberById(memberId);
+    if (isNotCompanyMember(company, memberId))
+      throw new EntityNotFoundException("Not a company member!");
 
-    if (!company.getMemberIds().contains(member.getId()))
-      throw new EntityNotFoundException("Member not found");
-
-    return member;
+    return getMemberById(memberId);
   }
 
   public ArrayList<GetResponse> getAllMembers(String token) {
     Company company = getCompanyWithToken(token);
-    System.out.println(company.toString());
+
     ArrayList<GetResponse> members = new ArrayList<>();
     for (Long memberId : company.getMemberIds()) {
       GetResponse member = getMemberById(memberId);
       members.add(member);
     }
-    System.out.println(members.toString());
     return members;
   }
 
@@ -142,7 +150,7 @@ public class CompanyService {
   public void deleteMember(String token, long memberId) throws IllegalAccessException {
     Company company = getCompanyWithToken(token);
 
-    if (!isCompanyMember(company, memberId))
+    if (isNotCompanyMember(company, memberId))
       throw new IllegalAccessException("Not a member of the company");
 
     User member = userRepository.findUserById(memberId)
@@ -170,8 +178,8 @@ public class CompanyService {
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
   }
 
-  private boolean isCompanyMember(Company company, long memberId) {
-    return company.getMemberIds().contains(memberId);
+  private boolean isNotCompanyMember(Company company, long memberId) {
+    return !company.getMemberIds().contains(memberId);
   }
 
   private GetResponse getMemberById(long id) {
