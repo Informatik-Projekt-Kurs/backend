@@ -1,5 +1,7 @@
 package com.MeetMate.company;
 
+import com.MeetMate.appointment.Appointment;
+import com.MeetMate.appointment.AppointmentRepository;
 import com.MeetMate.company.sequence.CompanySequenceService;
 import com.MeetMate.enums.BusinessType;
 import com.MeetMate.enums.UserRole;
@@ -33,29 +35,43 @@ public class CompanyService {
   private final MongoTemplate mongoTemplate;
   private final CompanySequenceService companySequenceService;
   private final JwtService jwtService;
+  private final AppointmentRepository appointmentRepository;
 
   public Company getCompany(long id) throws IllegalArgumentException {
     return companyRepository.findCompanyById(id)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
   }
 
-  public ArrayList<GetResponse> getSubscribers(long id) {
-    companyRepository.findCompanyById(id)
+  public ArrayList<GetResponse> getClients(String token) throws IllegalAccessException {
+    String email = jwtService.extractUserEmail(token);
+
+    Company company = companyRepository.findCompanyByOwnerEmail(email)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
-    ArrayList<GetResponse> response = new ArrayList<>();
-    List<User> subscribers = userRepository.findAll();
+    if (isNotCompanyOwner(email)
+        && isNotCompanyMember(company, userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User not found!"))
+        .getId()))
+      throw new IllegalAccessException("Not a company member");
 
-    for (User user : subscribers) {
-      if (user.getSubscribedCompanies().contains(id))
+    ArrayList<Appointment> appointments = appointmentRepository.findAppointmentsByCompanyId(company.getId());
+    ArrayList<User> clients = new ArrayList<>();
+
+    for (Appointment appointment : appointments) {
+      clients.add(
+          userRepository.findUserById(
+              appointment.getClientId()
+          ).orElse(null)
+      );
+    }
+
+    ArrayList<GetResponse> response = new ArrayList<>();
+
+    for (User user : clients) {
         response.add(GetResponse.builder()
             .id(user.getId())
             .name(user.getName())
-            .created_at(user.getCreatedAt())
             .email(user.getEmail())
-            .role(user.getRole())
-            .associatedCompany(user.getAssociatedCompany())
-            .subscribedCompanies(user.getSubscribedCompanies())
             .build());
     }
 
@@ -133,13 +149,13 @@ public class CompanyService {
   }
 
   public GetResponse getMember(String token, long memberId) throws IllegalAccessException {
-    String ownerEmail = jwtService.extractUserEmail(token);
+    String email = jwtService.extractUserEmail(token);
 
-    Company company = companyRepository.findCompanyByOwnerEmail(ownerEmail)
+    Company company = companyRepository.findCompanyByOwnerEmail(email)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
-    if (isNotCompanyOwner(ownerEmail)
-        && isNotCompanyMember(company, userRepository.findUserByEmail(ownerEmail)
+    if (isNotCompanyOwner(email)
+        && isNotCompanyMember(company, userRepository.findUserByEmail(email)
         .orElseThrow(() -> new EntityNotFoundException("User not found!"))
         .getId()))
       throw new IllegalAccessException("Not a company member");
@@ -151,13 +167,13 @@ public class CompanyService {
   }
 
   public ArrayList<GetResponse> getAllMembers(String token) throws IllegalAccessException {
-    String ownerEmail = jwtService.extractUserEmail(token);
+    String email = jwtService.extractUserEmail(token);
 
-    Company company = companyRepository.findCompanyByOwnerEmail(ownerEmail)
+    Company company = companyRepository.findCompanyByOwnerEmail(email)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
-    if (isNotCompanyOwner(ownerEmail)
-        && isNotCompanyMember(company, userRepository.findUserByEmail(ownerEmail)
+    if (isNotCompanyOwner(email)
+        && isNotCompanyMember(company, userRepository.findUserByEmail(email)
         .orElseThrow(() -> new EntityNotFoundException("User not found!"))
         .getId()))
       throw new IllegalAccessException("Not a company member");

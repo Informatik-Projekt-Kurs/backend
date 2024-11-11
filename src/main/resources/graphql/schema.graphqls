@@ -5,7 +5,7 @@ type Query {
     #Company Queries
     getCompany(id: ID!): Company
 
-    getSubscribers(id: ID!): [GetResponse]
+    getClients: [GetResponse]
 
     getCompanies: [Company]
 

@@ -45,9 +45,11 @@ public class CompanyController {
   }
 
   @QueryMapping
-  public ArrayList<GetResponse> getSubscribers(@Argument long id) {
+  public ArrayList<GetResponse> getClients(
+      @ContextValue String token) {
+    token = token.substring(7);
     try {
-      return companyService.getSubscribers(id);
+      return companyService.getClients(token);
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
@@ -68,6 +70,7 @@ public class CompanyController {
     }
 
   }
+
   @MutationMapping
   public ResponseEntity<?> createCompany(
       @Argument String companyName,
