@@ -45,7 +45,10 @@ public class CompanyService {
   public ArrayList<GetResponse> getClients(String token) throws IllegalAccessException {
     String email = jwtService.extractUserEmail(token);
 
-    Company company = companyRepository.findCompanyByOwnerEmail(email)
+    User companyMember = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+
+    Company company = companyRepository.findCompanyById(companyMember.getAssociatedCompany())
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
     if (isNotCompanyOwner(email)
@@ -68,11 +71,11 @@ public class CompanyService {
     ArrayList<GetResponse> response = new ArrayList<>();
 
     for (User user : clients) {
-        response.add(GetResponse.builder()
-            .id(user.getId())
-            .name(user.getName())
-            .email(user.getEmail())
-            .build());
+      response.add(GetResponse.builder()
+          .id(user.getId())
+          .name(user.getName())
+          .email(user.getEmail())
+          .build());
     }
 
     return response;
@@ -147,6 +150,8 @@ public class CompanyService {
     }
     companyRepository.delete(company);
   }
+
+  ////////////////MEMBER MANAGEMENT////////////////
 
   public GetResponse getMember(String token, long memberId) throws IllegalAccessException {
     String email = jwtService.extractUserEmail(token);
