@@ -16,6 +16,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 public class AppointmentService {
@@ -35,7 +37,7 @@ public class AppointmentService {
   }
 
   @Transactional
-  public void createAppointment(String from, String to, long companyId, long clientId, long assigneeId, String description, String location, AppointmentStatus status) {
+  public void createAppointment(Instant from, Instant to, long companyId, long clientId, long assigneeId, String description, String location, AppointmentStatus status) {
     //Check if IDs are valid
     if (companyRepository.findCompanyById(companyId).isEmpty())
       throw new EntityNotFoundException("Company not found");
@@ -47,8 +49,8 @@ public class AppointmentService {
     long appointmentId = appointmentSequenceService.getCurrentValue();
 
     Appointment appointment = new Appointment(appointmentId, companyId);
-    if (from != null && !from.isEmpty()) appointment.setFrom(from);
-    if (to != null && !to.isEmpty()) appointment.setTo(to);
+    if (from != null)  appointment.setFrom(from);
+    if (to != null) appointment.setTo(to);
     if (clientId != 0) appointment.setClientId(clientId);
     if (assigneeId != 0) appointment.setAssigneeId(assigneeId);
     if (description != null && !description.isEmpty()) appointment.setDescription(description);
@@ -60,7 +62,7 @@ public class AppointmentService {
   }
 
   @Transactional
-  public void editAppointment(String token, long appointmentId, String from, String to, long clientId, long assigneeId, String description, String location, AppointmentStatus status) throws IllegalAccessException {
+  public void editAppointment(String token, long appointmentId, Instant from, Instant to, long clientId, long assigneeId, String description, String location, AppointmentStatus status) throws IllegalAccessException {
     if (userNotInAppointment(token, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
 
@@ -73,8 +75,8 @@ public class AppointmentService {
     Query query = new Query(Criteria.where("appointmentId").is(appointmentId));
     Update update = new Update();
 
-    if (from != null && !from.isEmpty()) update.set("from", from);
-    if (to != null && !to.isEmpty()) update.set("to", to);
+    if (from != null) update.set("from", from);
+    if (to != null) update.set("to", to);
     if (clientId != 0) update.set("clientId", clientId);
     if (assigneeId != 0) update.set("assigneeId", assigneeId);
     if (description != null && !description.isEmpty()) update.set("description", description);

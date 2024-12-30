@@ -1,8 +1,8 @@
 package com.MeetMate.enums;
 
 public enum AppointmentStatus {
-  APPROVED,
-  DECLINED,
-  DONE,
-  CANCELLED;
+  PENDING,
+  BOOKED,
+  CANCELLED,
+  COMPLETED;
 }

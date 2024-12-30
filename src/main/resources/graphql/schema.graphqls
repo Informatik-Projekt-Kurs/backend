@@ -5,6 +5,8 @@ type Query {
     #Company Queries
     getCompany(id: ID!): Company
 
+    getAvailableAppointments(companyId: ID!): [Appointment]
+
     getClients: [GetResponse]
 
     getCompanies: [Company]

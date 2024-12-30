@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.time.Instant;
+
 @Controller
 @RequestMapping(path = "api/appointment")
 @RequiredArgsConstructor
@@ -42,8 +44,8 @@ public class AppointmentController {
 
   @MutationMapping
   public ResponseEntity<?> createAppointment(
-      @Argument String from,
-      @Argument String to,
+      @Argument Instant from,
+      @Argument Instant to,
       @Argument long companyId,
       @Argument long clientId,
       @Argument long assigneeId,
@@ -70,8 +72,8 @@ public class AppointmentController {
   public ResponseEntity<?> editAppointment(
       @ContextValue String token,
       @Argument long id,
-      @Argument String from,
-      @Argument String to,
+      @Argument Instant from,
+      @Argument Instant to,
       @Argument long clientId,
       @Argument long assigneeId,
 //      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
