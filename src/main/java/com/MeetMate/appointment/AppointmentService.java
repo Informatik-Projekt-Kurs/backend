@@ -29,48 +29,44 @@ public class AppointmentService {
   private final UserRepository userRepository;
   private final CompanyRepository companyRepository;
 
-  public Appointment getAppointment(String token, long appointmentId) {
-    if (userNotInAppointment(token, appointmentId))
-      throw new IllegalArgumentException("User is not eligible to edit this appointment");
-    return appointmentRepository.findAppointmentById(appointmentId)
+  public Appointment getAppointment(String token, long appointmentId) throws IllegalAccessException {
+    String email = jwtService.extractUserEmail(token);
+    User user = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+    Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
         .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+
+    if (user.getId() != appointment.getClientId() && user.getAssociatedCompany() != appointment.getCompanyId())
+      throw new IllegalAccessException("User is not eligible to view this appointment");
+
+    return appointment;
+
   }
 
   @Transactional
-  public void createAppointment(Instant from, Instant to, long companyId, long clientId, long assigneeId, String description, String location, AppointmentStatus status) {
-    //Check if IDs are valid
-    if (companyRepository.findCompanyById(companyId).isEmpty())
-      throw new EntityNotFoundException("Company not found");
-    if (clientId != 0 && userRepository.findUserById(clientId).isEmpty())
-      throw new EntityNotFoundException("Client not found");
-    if (assigneeId != 0 && userRepository.findUserById(assigneeId).isEmpty())
-      throw new EntityNotFoundException("Assignee not found");
+  public void createAppointment(String token, Instant from, Instant to, long companyId, String description, String location) {
+    Company company = getCompanyFromToken(token);
 
     long appointmentId = appointmentSequenceService.getCurrentValue();
 
     Appointment appointment = new Appointment(appointmentId, companyId);
-    if (from != null)  appointment.setFrom(from);
+    if (from != null) appointment.setFrom(from);
     if (to != null) appointment.setTo(to);
-    if (clientId != 0) appointment.setClientId(clientId);
-    if (assigneeId != 0) appointment.setAssigneeId(assigneeId);
     if (description != null && !description.isEmpty()) appointment.setDescription(description);
     if (location != null && !location.isEmpty()) appointment.setLocation(location);
-    if (status != null) appointment.setStatus(status);
+    appointment.setStatus(AppointmentStatus.PENDING);
 
     appointmentRepository.save(appointment);
     appointmentSequenceService.incrementId();
   }
 
   @Transactional
-  public void editAppointment(String token, long appointmentId, Instant from, Instant to, long clientId, long assigneeId, String description, String location, AppointmentStatus status) throws IllegalAccessException {
-    if (userNotInAppointment(token, appointmentId))
-      throw new IllegalArgumentException("User is not eligible to edit this appointment");
+  public void editAppointment(String token, long appointmentId, Instant from, Instant to, long clientId, String description, String location, AppointmentStatus status) {
+    Company company = getCompanyFromToken(token);
 
-    //Check if IDs are valid
-    if (clientId != 0 && userRepository.findUserById(clientId).isEmpty())
-      throw new EntityNotFoundException("Client not found");
-    if (assigneeId != 0 && userRepository.findUserById(assigneeId).isEmpty())
-      throw new EntityNotFoundException("Assignee not found");
+    if (appointmentNotOfCompany(company, appointmentId))
+      throw new IllegalArgumentException("User is not eligible to edit this appointment");
 
     Query query = new Query(Criteria.where("appointmentId").is(appointmentId));
     Update update = new Update();
@@ -78,7 +74,6 @@ public class AppointmentService {
     if (from != null) update.set("from", from);
     if (to != null) update.set("to", to);
     if (clientId != 0) update.set("clientId", clientId);
-    if (assigneeId != 0) update.set("assigneeId", assigneeId);
     if (description != null && !description.isEmpty()) update.set("description", description);
     if (location != null && !location.isEmpty()) update.set("location", location);
     if (status != null) update.set("status", status);
@@ -88,7 +83,8 @@ public class AppointmentService {
 
   @Transactional
   public void deleteAppointment(String token, long appointmentId) {
-    if (userNotInAppointment(token, appointmentId))
+    Company company = getCompanyFromToken(token);
+    if (appointmentNotOfCompany(company, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
     Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
         .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
@@ -96,27 +92,21 @@ public class AppointmentService {
     appointmentRepository.delete(appointment);
   }
 
-  private boolean userNotInAppointment(String token, long appointmentId) throws IllegalArgumentException {
+  private boolean appointmentNotOfCompany(Company company, long appointmentId) throws IllegalArgumentException {
+    Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
+        .orElseThrow(() -> new EntityNotFoundException("Appointment not found!"));
+    
+    return appointment.getCompanyId() != company.getId();
+  }
+
+  private Company getCompanyFromToken(String token) {
     String userEmail = jwtService.extractUserEmail(token);
     User user = userRepository.findUserByEmail(userEmail)
         .orElseThrow(() -> new EntityNotFoundException("User not found!"));
-    Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
-        .orElseThrow(() -> new EntityNotFoundException("Appointment not found!"));
-
-    switch (user.getRole()) {
-      case COMPANY_OWNER, COMPANY_MEMBER -> {
-        if (appointment.getCompanyId() == user.getAssociatedCompany())
-          return false;
-      }
-      case CLIENT -> {
-        if (appointment.getClientId() == user.getId())
-          return false;
-      }
-      default -> {
-        throw new IllegalStateException("Role of user not found!");
-      }
-    }
-    return true;
+    if (user.getAssociatedCompany() == -1L)
+      throw new EntityNotFoundException("User is not associated with a company");
+    return companyRepository.findCompanyById(user.getAssociatedCompany())
+        .orElseThrow(() -> new EntityNotFoundException("Company not found!"));
   }
 
 }

@@ -44,18 +44,17 @@ public class AppointmentController {
 
   @MutationMapping
   public ResponseEntity<?> createAppointment(
+      @ContextValue String token,
       @Argument Instant from,
       @Argument Instant to,
       @Argument long companyId,
-      @Argument long clientId,
-      @Argument long assigneeId,
 //      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
       @Argument String description,
-      @Argument String location,
-      @Argument String status
+      @Argument String location
   ) {
+    token = token.substring(7);
     try {
-      appointmentService.createAppointment(from, to, companyId, clientId, assigneeId, description, location, AppointmentStatus.valueOf(status));
+      appointmentService.createAppointment(token, from, to, companyId, description, location);
       return ResponseEntity.ok().build();
 
     } catch (Throwable t) {
@@ -75,7 +74,6 @@ public class AppointmentController {
       @Argument Instant from,
       @Argument Instant to,
       @Argument long clientId,
-      @Argument long assigneeId,
 //      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
       @Argument String description,
       @Argument String location,
@@ -83,7 +81,7 @@ public class AppointmentController {
   ) {
     token = token.substring(7);
     try {
-      appointmentService.editAppointment(token, id, from, to, clientId, assigneeId, description, location, AppointmentStatus.valueOf(status));
+      appointmentService.editAppointment(token, id, from, to, clientId, description, location, AppointmentStatus.valueOf(status));
       return ResponseEntity.ok().build();
 
     } catch (Throwable t) {

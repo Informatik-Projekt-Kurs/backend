@@ -52,12 +52,9 @@ type Mutation {
         from: String,
         to: String,
         companyId: ID!,
-        clientId: ID,
-        assigneeId: ID,
 #
         description: String,
         location: String,
-        status: String
     ): String
 
     editAppointment(
@@ -65,7 +62,6 @@ type Mutation {
         from: String,
         to: String,
         clientId: ID,
-        assigneeId: ID,
 
         description: String,
         location: String,
