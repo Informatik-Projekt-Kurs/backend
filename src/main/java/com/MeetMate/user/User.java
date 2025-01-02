@@ -4,6 +4,7 @@ import com.MeetMate._experiments.Experimentational;
 import com.MeetMate.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,6 +30,8 @@ public class User implements UserDetails {
   private String refreshToken;
   // bool verified
   private long associatedCompany;
+//  @ElementCollection
+//  @CollectionTable(name = "subscribed_companies", joinColumns = @JoinColumn(name = "user_id"))
   private ArrayList<Long> subscribedCompanies;
 
   public User() {}
