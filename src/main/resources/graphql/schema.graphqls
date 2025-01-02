@@ -48,6 +48,10 @@ type Mutation {
     ): String
 
     #Appointment Mutations
+    bookAppointment(
+        appointmentId: ID!
+    ): String
+
     createAppointment(
         from: String,
         to: String,

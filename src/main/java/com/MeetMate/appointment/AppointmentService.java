@@ -4,6 +4,7 @@ import com.MeetMate.appointment.sequence.AppointmentSequenceService;
 import com.MeetMate.company.Company;
 import com.MeetMate.company.CompanyRepository;
 import com.MeetMate.enums.AppointmentStatus;
+import com.MeetMate.enums.UserRole;
 import com.MeetMate.security.JwtService;
 import com.MeetMate.user.User;
 import com.MeetMate.user.UserRepository;
@@ -30,9 +31,7 @@ public class AppointmentService {
   private final CompanyRepository companyRepository;
 
   public Appointment getAppointment(String token, long appointmentId) throws IllegalAccessException {
-    String email = jwtService.extractUserEmail(token);
-    User user = userRepository.findUserByEmail(email)
-        .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    User user = getUserFromToken(token);
 
     Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
         .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
@@ -41,7 +40,25 @@ public class AppointmentService {
       throw new IllegalAccessException("User is not eligible to view this appointment");
 
     return appointment;
+  }
 
+  @Transactional
+  public void bookAppointment(String token, long appointmentId) throws IllegalAccessException {
+    User user = getUserFromToken(token);
+
+    Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
+        .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+
+    if (user.getRole() != UserRole.CLIENT)
+      throw new IllegalAccessException("Only clients can book appointments");
+
+    Query query = new Query(Criteria.where("appointmentId").is(appointmentId));
+    Update update = new Update();
+
+    update.set("clientId", user.getId());
+    update.set("status", AppointmentStatus.BOOKED);
+
+    mongoTemplate.updateFirst(query, update, Appointment.class);
   }
 
   @Transactional
@@ -78,7 +95,7 @@ public class AppointmentService {
     if (location != null && !location.isEmpty()) update.set("location", location);
     if (status != null) update.set("status", status);
 
-    mongoTemplate.updateFirst(query, update, Company.class);
+    mongoTemplate.updateFirst(query, update, Appointment.class);
   }
 
   @Transactional
@@ -95,8 +112,14 @@ public class AppointmentService {
   private boolean appointmentNotOfCompany(Company company, long appointmentId) throws IllegalArgumentException {
     Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
         .orElseThrow(() -> new EntityNotFoundException("Appointment not found!"));
-    
+
     return appointment.getCompanyId() != company.getId();
+  }
+
+  private User getUserFromToken(String token) {
+    String email = jwtService.extractUserEmail(token);
+    return userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User not found"));
   }
 
   private Company getCompanyFromToken(String token) {

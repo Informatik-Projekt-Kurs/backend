@@ -43,6 +43,27 @@ public class AppointmentController {
   }
 
   @MutationMapping
+  public ResponseEntity<?> bookAppointment(
+      @ContextValue String token,
+      @Argument long appointmentId) {
+    token = token.substring(7);
+    try {
+      appointmentService.bookAppointment(token, appointmentId);
+      return ResponseEntity.ok().build();
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalAccessException.class)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
+    }
+  }
+
+  @MutationMapping
   public ResponseEntity<?> createAppointment(
       @ContextValue String token,
       @Argument Instant from,
