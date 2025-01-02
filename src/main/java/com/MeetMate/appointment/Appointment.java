@@ -17,8 +17,6 @@ public class Appointment {
   private Instant to;
   private long companyId;
   private long clientId;
-  private long assigneeId;
-  //  Select Prompt → f.E. medical industry: Untersuchung, Operation
   private String description;
   private String location;
   private AppointmentStatus status;

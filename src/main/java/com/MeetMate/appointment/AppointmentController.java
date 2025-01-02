@@ -128,7 +128,7 @@ public class AppointmentController {
     token = token.substring(7);
     try {
       appointmentService.deleteAppointment(token, id);
-      return ResponseEntity.ok().build();
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
