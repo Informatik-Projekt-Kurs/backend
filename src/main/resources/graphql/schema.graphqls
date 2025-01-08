@@ -5,6 +5,8 @@ type Query {
     #Company Queries
     getCompany(id: ID!): Company
 
+    getAvailableAppointments(companyId: ID!): [Appointment]
+
     getClients: [GetResponse]
 
     getCompanies: [Company]
@@ -46,16 +48,16 @@ type Mutation {
     ): String
 
     #Appointment Mutations
+    bookAppointment(
+        appointmentId: ID!
+    ): String
+
     createAppointment(
         from: String,
         to: String,
         companyId: ID!,
-        clientId: ID,
-        assigneeId: ID,
-#
         description: String,
         location: String,
-        status: String
     ): String
 
     editAppointment(
@@ -63,8 +65,6 @@ type Mutation {
         from: String,
         to: String,
         clientId: ID,
-        assigneeId: ID,
-
         description: String,
         location: String,
         status: String
@@ -90,8 +90,6 @@ type Appointment {
     to: String
     companyId: ID
     clientId: ID
-    assigneeId: ID
-    # Select Prompt → f.E. medical industry: Untersuchung, Operation
     description: String
     location: String
     Status: String

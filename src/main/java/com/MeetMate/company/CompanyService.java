@@ -3,6 +3,7 @@ package com.MeetMate.company;
 import com.MeetMate.appointment.Appointment;
 import com.MeetMate.appointment.AppointmentRepository;
 import com.MeetMate.company.sequence.CompanySequenceService;
+import com.MeetMate.enums.AppointmentStatus;
 import com.MeetMate.enums.BusinessType;
 import com.MeetMate.enums.UserRole;
 import com.MeetMate.response.GetResponse;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +43,18 @@ public class CompanyService {
   public Company getCompany(long id) throws IllegalArgumentException {
     return companyRepository.findCompanyById(id)
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+  }
+
+  public ArrayList<Appointment> getAvailableAppointments(long id) {
+    ArrayList<Appointment> appointments = appointmentRepository.findAppointmentsByCompanyId(id);
+    ArrayList<Appointment> availableAppointments = new ArrayList<>();
+
+    for (Appointment appointment : appointments) {
+      if (appointment.getStatus() == AppointmentStatus.PENDING
+          && appointment.getFrom().isAfter(Instant.now()))
+        availableAppointments.add(appointment);
+    }
+    return availableAppointments;
   }
 
   public ArrayList<GetResponse> getClients(String token) throws IllegalAccessException {

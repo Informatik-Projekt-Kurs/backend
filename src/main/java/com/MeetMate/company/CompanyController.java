@@ -1,5 +1,6 @@
 package com.MeetMate.company;
 
+import com.MeetMate.appointment.Appointment;
 import com.MeetMate.enums.UserRole;
 import com.MeetMate.response.GetResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -41,6 +42,17 @@ public class CompanyController {
 //                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
 
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
+    }
+  }
+
+  @QueryMapping
+  public ArrayList<Appointment> getAvailableAppointments(@Argument long companyId) {
+    try {
+      return companyService.getAvailableAppointments(companyId);
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+      return new ArrayList<Appointment>();
     }
   }
 
