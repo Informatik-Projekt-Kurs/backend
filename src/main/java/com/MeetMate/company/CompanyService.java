@@ -50,12 +50,14 @@ public class CompanyService {
     ArrayList<Appointment> appointments = appointmentRepository.findAppointmentsByCompanyId(id);
     ArrayList<Appointment> availableAppointments = new ArrayList<>();
 
-    boolean isSameDay = date == null ||
-        LocalDate.ofInstant(date, ZoneId.systemDefault()).isEqual(LocalDate.now());
-
     for (Appointment appointment : appointments) {
+      Instant appointmentTime = appointment.getFrom();
+      boolean isSameDay = date == null ||
+          LocalDate.ofInstant(date, ZoneId.systemDefault())
+              .equals(LocalDate.ofInstant(appointmentTime, ZoneId.systemDefault()));
+
       if (appointment.getStatus() == AppointmentStatus.PENDING
-          && appointment.getFrom().isAfter(Instant.now())
+          && appointmentTime.isAfter(Instant.now())
           && isSameDay)
         availableAppointments.add(appointment);
     }
