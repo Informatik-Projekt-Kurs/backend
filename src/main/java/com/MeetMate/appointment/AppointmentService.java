@@ -62,12 +62,12 @@ public class AppointmentService {
   }
 
   @Transactional
-  public void createAppointment(String token, Instant from, Instant to, long companyId, String description, String location) {
+  public void createAppointment(String token, Instant from, Instant to, String description, String location) {
     Company company = getCompanyFromToken(token);
 
     long appointmentId = appointmentSequenceService.getCurrentValue();
 
-    Appointment appointment = new Appointment(appointmentId, companyId);
+    Appointment appointment = new Appointment(appointmentId, company.getId());
     if (from != null) appointment.setFrom(from);
     if (to != null) appointment.setTo(to);
     if (description != null && !description.isEmpty()) appointment.setDescription(description);
