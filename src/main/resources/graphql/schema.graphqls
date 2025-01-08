@@ -5,7 +5,10 @@ type Query {
     #Company Queries
     getCompany(id: ID!): Company
 
-    getAvailableAppointments(companyId: ID!): [Appointment]
+    getAvailableAppointments(
+        companyId: ID!
+        date: String
+    ): [Appointment]
 
     getClients: [GetResponse]
 
