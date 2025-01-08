@@ -5,7 +5,10 @@ type Query {
     #Company Queries
     getCompany(id: ID!): Company
 
-    getAvailableAppointments(companyId: ID!): [Appointment]
+    getAvailableAppointments(
+        companyId: ID!
+        date: String
+    ): [Appointment]
 
     getClients: [GetResponse]
 
@@ -53,9 +56,8 @@ type Mutation {
     ): String
 
     createAppointment(
-        from: String,
-        to: String,
-        companyId: ID!,
+        from: String!,
+        to: String!,
         description: String,
         location: String,
     ): String

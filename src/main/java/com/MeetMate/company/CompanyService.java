@@ -24,7 +24,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,13 +46,19 @@ public class CompanyService {
         .orElseThrow(() -> new EntityNotFoundException("Company not found"));
   }
 
-  public ArrayList<Appointment> getAvailableAppointments(long id) {
+  public ArrayList<Appointment> getAvailableAppointments(long id, Instant date) {
     ArrayList<Appointment> appointments = appointmentRepository.findAppointmentsByCompanyId(id);
     ArrayList<Appointment> availableAppointments = new ArrayList<>();
 
     for (Appointment appointment : appointments) {
+      Instant appointmentTime = appointment.getFrom();
+      boolean isSameDay = date == null ||
+          LocalDate.ofInstant(date, ZoneId.systemDefault())
+              .equals(LocalDate.ofInstant(appointmentTime, ZoneId.systemDefault()));
+
       if (appointment.getStatus() == AppointmentStatus.PENDING
-          && appointment.getFrom().isAfter(Instant.now()))
+          && appointmentTime.isAfter(Instant.now())
+          && isSameDay)
         availableAppointments.add(appointment);
     }
     return availableAppointments;

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.InaccessibleObjectException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,9 +47,11 @@ public class CompanyController {
   }
 
   @QueryMapping
-  public ArrayList<Appointment> getAvailableAppointments(@Argument long companyId) {
+  public ArrayList<Appointment> getAvailableAppointments(
+      @Argument long companyId,
+      @Argument Instant date) {
     try {
-      return companyService.getAvailableAppointments(companyId);
+      return companyService.getAvailableAppointments(companyId, date);
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
