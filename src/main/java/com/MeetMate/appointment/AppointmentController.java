@@ -97,11 +97,11 @@ public class AppointmentController {
 //      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
       @Argument String description,
       @Argument String location,
-      @Argument String status
+      @Argument AppointmentStatus status
   ) {
     token = token.substring(7);
     try {
-      appointmentService.editAppointment(token, id, from, to, clientId, description, location, AppointmentStatus.valueOf(status));
+      appointmentService.editAppointment(token, id, from, to, clientId, description, location, status);
       return ResponseEntity.ok().build();
 
     } catch (Throwable t) {
