@@ -52,7 +52,7 @@ public class AppointmentService {
     if (user.getRole() != UserRole.CLIENT)
       throw new IllegalAccessException("Only clients can book appointments");
 
-    Query query = new Query(Criteria.where("appointmentId").is(appointmentId));
+    Query query = new Query(Criteria.where("id").is(appointmentId));
     Update update = new Update();
 
     update.set("clientId", user.getId());
@@ -85,7 +85,7 @@ public class AppointmentService {
     if (appointmentNotOfCompany(company, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
 
-    Query query = new Query(Criteria.where("appointmentId").is(appointmentId));
+    Query query = new Query(Criteria.where("id").is(appointmentId));
     Update update = new Update();
 
     if (from != null) update.set("from", from);

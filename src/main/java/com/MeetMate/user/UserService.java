@@ -1,5 +1,7 @@
 package com.MeetMate.user;
 
+import com.MeetMate.appointment.Appointment;
+import com.MeetMate.appointment.AppointmentRepository;
 import com.MeetMate.company.CompanyRepository;
 import com.MeetMate.enums.UserRole;
 import com.MeetMate.response.AuthenticationResponse;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
 import javax.naming.NameAlreadyBoundException;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -28,6 +31,7 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final CompanyRepository companyRepository;
+  private final AppointmentRepository appointmentRepository;
 
   public GetResponse getUser(String token) {
     String email = jwtService.extractUserEmail(token);
@@ -194,5 +198,29 @@ public class UserService {
               .getId()
           );
 
+  }
+
+  public List<Appointment> getUserAppointments(String token) throws IllegalAccessException {
+    String email = jwtService.extractUserEmail(token);
+    User user = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+
+    if (user.getRole() == UserRole.COMPANY_OWNER || user.getRole() == UserRole.COMPANY_MEMBER)
+      throw new IllegalAccessException("Company owners and members cannot have appointments");
+
+    return appointmentRepository.findAppointmentsByClientId(user.getId());
+  }
+
+  public List<Appointment> getRelevantAppointments(String token) throws IllegalAccessException {
+    List<Appointment> appointments = getUserAppointments(token);
+    appointments.sort((a1, a2) -> a1.getFrom().compareTo(a2.getFrom())); //Merge sort
+    int index;
+    for (index = 0; index < appointments.size() - 1; index++) {
+      if (appointments.get(index).getFrom().isBefore(Instant.now()))
+        break;
+    }
+    int outputSize = appointments.size() <= 4 ? appointments.size() : 4;
+
+    return appointments.subList(index, index+outputSize);
   }
 }

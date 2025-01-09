@@ -180,4 +180,45 @@ public class UserController {
           .body("message: " + t.getMessage());
     }
   }
+
+  @GetMapping(path = "appointments")
+  @ResponseBody
+  public ResponseEntity<?> getUserAppointments(@RequestHeader(name = "Authorization") String token){
+    token = token.substring(7);
+    try {
+      return ResponseEntity.ok(userService.getUserAppointments(token));
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalAccessException.class)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
+    }
+  }
+  @GetMapping(path = "relevantAppointments")
+  @ResponseBody
+  public ResponseEntity<?> getRelevantAppointments(@RequestHeader(name = "Authorization") String token){
+    token = token.substring(7);
+    try {
+      return ResponseEntity.ok(userService.getRelevantAppointments(token));
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalAccessException.class)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
+    }
+  }
+
+
 }
