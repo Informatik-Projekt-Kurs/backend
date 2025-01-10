@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SequenceService {
+public class CompanySequenceService {
 
   private final MongoTemplate mongoTemplate;
 

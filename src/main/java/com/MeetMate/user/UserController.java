@@ -1,17 +1,17 @@
 package com.MeetMate.user;
 
 import jakarta.persistence.EntityNotFoundException;
-import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import javax.naming.NameAlreadyBoundException;
+
+//.body("message: " + t.getMessage() + "\nStack trace: " + Arrays.toString(t.getStackTrace()));
 
 @RestController
 @RequestMapping(path = "api/user")
@@ -25,7 +25,7 @@ public class UserController {
   public ResponseEntity<?> getUser(@RequestHeader(name = "Authorization") String token) {
     token = token.substring(7);
     try {
-      return ResponseEntity.ok(userService.getUserByEmail(token));
+      return ResponseEntity.ok(userService.getUser(token));
 
     } catch (Throwable t) {
       Class<? extends Throwable> tc = t.getClass();
@@ -52,25 +52,23 @@ public class UserController {
 
   @PostMapping(path = "signup")
   @ResponseBody
-  public ResponseEntity<?> registerNewUser(
-          @RequestParam String email,
-          @RequestParam String password,
-          @RequestParam String name) {
-
-    System.out.println("Received signup request for email: " + email);
-
+  public ResponseEntity<?> registerNewUser(@RequestParam MultiValueMap<String, String> data) {
     try {
-      MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-      data.add("email", email);
-      data.add("password", password);
-      data.add("name", name);
-
       userService.registerNewUser(data);
       return ResponseEntity.ok().build();
+
     } catch (Throwable t) {
-      System.out.println("Error in registerNewUser " + t);
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("message: " + t.getMessage());
+
+      if (tc == NameAlreadyBoundException.class)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body("message: " + t.getMessage());
+
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-              .body("message: " + t.getMessage() + "\nStack trace: " + Arrays.toString(t.getStackTrace()));
+          .body("message: " + t.getMessage());
     }
   }
 
@@ -150,8 +148,77 @@ public class UserController {
       if (tc == EntityNotFoundException.class)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
+      if (tc == IllegalAccessException.class)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("message: " + t.getMessage());
+
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("type: " + tc + "\nmessage: " + t.getMessage());
     }
   }
+
+  @PutMapping(path = "subscribe")
+  @ResponseBody
+  public ResponseEntity<?> subscribeToCompany(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestParam long companyId
+  ) {
+    token = token.substring(7);
+    try {
+      userService.subscribeToCompany(token, companyId);
+      return ResponseEntity.ok().build();
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
+    }
+  }
+
+  @GetMapping(path = "appointments")
+  @ResponseBody
+  public ResponseEntity<?> getUserAppointments(@RequestHeader(name = "Authorization") String token){
+    token = token.substring(7);
+    try {
+      return ResponseEntity.ok(userService.getUserAppointments(token));
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalAccessException.class)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
+    }
+  }
+  @GetMapping(path = "relevantAppointments")
+  @ResponseBody
+  public ResponseEntity<?> getRelevantAppointments(@RequestHeader(name = "Authorization") String token){
+    token = token.substring(7);
+    try {
+      return ResponseEntity.ok(userService.getRelevantAppointments(token));
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+
+      if (tc == EntityNotFoundException.class)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalAccessException.class)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("message: " + t.getMessage());
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("message: " + t.getMessage());
+    }
+  }
+
+
 }

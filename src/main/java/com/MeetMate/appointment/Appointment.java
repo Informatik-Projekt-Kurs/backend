@@ -1,24 +1,28 @@
-//package com.MeetMate.appointment;
-//
-//import com.MeetMate.enums.AppointmentStatus;
-//import lombok.Data;
-//import lombok.NoArgsConstructor;
-//import org.springframework.data.mongodb.core.mapping.Document;
-//
-//import java.time.LocalDateTime;
-//
-//@Document(collection = "appointments")
-//@Data
-//@NoArgsConstructor
-//public class Appointment {
-//  long id;
-//  LocalDateTime from;
-//  LocalDateTime to;
-//  long companyID;
-//  long clientID;
-//  long assigneeID;
-////  Select Prompt → f.E. medical industry: Untersuchung, Operation
-//  String description;
-//  String location;
-//  AppointmentStatus status;
-//}
+package com.MeetMate.appointment;
+
+import com.MeetMate.enums.AppointmentStatus;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.Instant;
+
+@Document(collection = "appointments")
+@Data
+@NoArgsConstructor
+public class Appointment {
+  private long id;
+  private Instant from;
+  private Instant to;
+  private long companyId;
+  private long clientId;
+  private String description;
+  private String location;
+  private AppointmentStatus status;
+
+  public Appointment(long id, long companyId) {
+    this.id = id;
+    this.companyId = companyId;
+  }
+}
