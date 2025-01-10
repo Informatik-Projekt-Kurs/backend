@@ -5,7 +5,25 @@ type Query {
     #Company Queries
     getCompany(id: ID!): Company
 
+    getAvailableAppointments(
+        companyId: ID!
+        date: String
+    ): [Appointment]
+
+    getAllAppointments(
+        companyId: ID!
+    ): [Appointment]
+
+    getClients: [GetResponse]
+
+    getCompanies: [Company]
+
+    getMember(memberId: ID!): GetResponse
+
+    getAllMembers: [GetResponse]
+
     #Appointment Queries
+    getAppointment(id: ID!): Appointment
 }
 
 type Mutation {
@@ -26,7 +44,41 @@ type Mutation {
 
     deleteCompany: String
 
+    addMember(
+        memberEmail: String!
+        memberName: String!
+        memberPassword: String!
+    ): String
+
+    deleteMember(
+        memberId: ID!
+    ): String
+
     #Appointment Mutations
+    bookAppointment(
+        appointmentId: ID!
+    ): String
+
+    createAppointment(
+        from: String!,
+        to: String!,
+        description: String,
+        location: String,
+    ): String
+
+    editAppointment(
+        id: ID!,
+        from: String,
+        to: String,
+        clientId: ID,
+        description: String,
+        location: String,
+        status: String
+    ): String
+
+    deleteAppointment(
+        id: ID!
+    ): String
 }
 
 type Company {
@@ -34,6 +86,27 @@ type Company {
     name: String
     description: String
     businessType: String
-    memberEmails: [String]
+    memberIds: [ID]
     ownerEmail: String
+}
+
+type Appointment {
+    id: ID
+    from: String
+    to: String
+    companyId: ID
+    clientId: ID
+    description: String
+    location: String
+    Status: String
+}
+
+type GetResponse {
+    id: ID
+    name: String
+    created_at: String
+    email: String
+    role: String
+    associatedCompany: ID
+    subscribedCompanies: [ID]
 }

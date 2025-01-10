@@ -1,8 +1,11 @@
 package com.MeetMate.user;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Repository
@@ -15,4 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findUserById(Long id);
 
     void deleteByEmail(String email);
+
+    void deleteById(@NotNull Long id);
+
+//    Optional<ArrayList<User>> findUsersBySubscribedCompaniesContaining(long companyId);
 }
