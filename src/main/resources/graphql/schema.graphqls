@@ -10,6 +10,10 @@ type Query {
         date: String
     ): [Appointment]
 
+    getAllAppointments(
+        companyId: ID!
+    ): [Appointment]
+
     getClients: [GetResponse]
 
     getCompanies: [Company]

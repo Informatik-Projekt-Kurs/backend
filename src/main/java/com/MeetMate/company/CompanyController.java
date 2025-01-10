@@ -60,6 +60,18 @@ public class CompanyController {
   }
 
   @QueryMapping
+  public ArrayList<Appointment> getAllAppointments(
+      @Argument long companyId) {
+    try {
+      return companyService.getAllAppointments(companyId);
+
+    } catch (Throwable t) {
+      Class<? extends Throwable> tc = t.getClass();
+      return new ArrayList<Appointment>();
+    }
+  }
+
+  @QueryMapping
   public ArrayList<GetResponse> getClients(
       @ContextValue String token) {
     token = token.substring(7);

@@ -64,6 +64,10 @@ public class CompanyService {
     return availableAppointments;
   }
 
+  public ArrayList<Appointment> getAllAppointments(long id){
+    return appointmentRepository.findAppointmentsByCompanyId(id);
+  }
+
   public ArrayList<GetResponse> getClients(String token) throws IllegalAccessException {
     String email = jwtService.extractUserEmail(token);
 
