@@ -68,13 +68,14 @@ public class AppointmentController {
       @ContextValue String token,
       @Argument Instant from,
       @Argument Instant to,
+      @Argument long clientId,
 //      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
       @Argument String description,
       @Argument String location
   ) {
     token = token.substring(7);
     try {
-      appointmentService.createAppointment(token, from, to, description, location);
+      appointmentService.createAppointment(token, from, to, clientId, description, location);
       return ResponseEntity.ok().build();
 
     } catch (Throwable t) {
