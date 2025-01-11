@@ -62,14 +62,18 @@ public class AppointmentService {
   }
 
   @Transactional
-  public void createAppointment(String token, Instant from, Instant to, String description, String location) {
+  public void createAppointment(String token, Instant from, Instant to, long clientId, String title, String description, String location) {
     Company company = getCompanyFromToken(token);
+
+    if(userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
 
     long appointmentId = appointmentSequenceService.getCurrentValue();
 
     Appointment appointment = new Appointment(appointmentId, company.getId());
     if (from != null) appointment.setFrom(from);
     if (to != null) appointment.setTo(to);
+    if (clientId != 0) appointment.setClientId(clientId);
+    if (title != null && !title.isEmpty()) appointment.setTitle(title);
     if (description != null && !description.isEmpty()) appointment.setDescription(description);
     if (location != null && !location.isEmpty()) appointment.setLocation(location);
     appointment.setStatus(AppointmentStatus.PENDING);
@@ -79,8 +83,10 @@ public class AppointmentService {
   }
 
   @Transactional
-  public void editAppointment(String token, long appointmentId, Instant from, Instant to, long clientId, String description, String location, AppointmentStatus status) {
+  public void editAppointment(String token, long appointmentId, Instant from, Instant to, long clientId, String title, String description, String location, AppointmentStatus status) {
     Company company = getCompanyFromToken(token);
+
+    if(userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
 
     if (appointmentNotOfCompany(company, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
@@ -91,6 +97,7 @@ public class AppointmentService {
     if (from != null) update.set("from", from);
     if (to != null) update.set("to", to);
     if (clientId != 0) update.set("clientId", clientId);
+    if (title != null && !title.isEmpty()) update.set("title", title);
     if (description != null && !description.isEmpty()) update.set("description", description);
     if (location != null && !location.isEmpty()) update.set("location", location);
     if (status != null) update.set("status", status);
@@ -130,6 +137,12 @@ public class AppointmentService {
       throw new EntityNotFoundException("User is not associated with a company");
     return companyRepository.findCompanyById(user.getAssociatedCompany())
         .orElseThrow(() -> new EntityNotFoundException("Company not found!"));
+  }
+
+  private boolean userIsNotClient(long clientId) {
+    return userRepository.findUserById(clientId)
+        .orElseThrow(() -> new EntityNotFoundException("Client not found"))
+        .getRole() != UserRole.CLIENT;
   }
 
 }

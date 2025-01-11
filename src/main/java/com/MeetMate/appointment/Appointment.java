@@ -17,6 +17,7 @@ public class Appointment {
   private Instant to;
   private long companyId;
   private long clientId;
+  private String title;
   private String description;
   private String location;
   private AppointmentStatus status;

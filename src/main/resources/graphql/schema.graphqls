@@ -62,6 +62,8 @@ type Mutation {
     createAppointment(
         from: String!,
         to: String!,
+        clientId: ID,
+        title: String,
         description: String,
         location: String,
     ): String
@@ -71,6 +73,7 @@ type Mutation {
         from: String,
         to: String,
         clientId: ID,
+        title: String,
         description: String,
         location: String,
         status: String
@@ -96,6 +99,7 @@ type Appointment {
     to: String
     companyId: ID
     clientId: ID
+    title: String
     description: String
     location: String
     Status: String
