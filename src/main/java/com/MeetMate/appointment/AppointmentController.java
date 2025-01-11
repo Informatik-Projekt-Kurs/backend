@@ -70,12 +70,13 @@ public class AppointmentController {
       @Argument Instant to,
       @Argument long clientId,
 //      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
+      @Argument String title,
       @Argument String description,
       @Argument String location
   ) {
     token = token.substring(7);
     try {
-      appointmentService.createAppointment(token, from, to, clientId, description, location);
+      appointmentService.createAppointment(token, from, to, clientId, title, description, location);
       return ResponseEntity.ok().build();
 
     } catch (Throwable t) {
@@ -83,6 +84,9 @@ public class AppointmentController {
 
       if (tc == EntityNotFoundException.class)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
+
+      if (tc == IllegalArgumentException.class)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
 
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
@@ -96,13 +100,14 @@ public class AppointmentController {
       @Argument Instant to,
       @Argument long clientId,
 //      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
+      @Argument String title,
       @Argument String description,
       @Argument String location,
       @Argument AppointmentStatus status
   ) {
     token = token.substring(7);
     try {
-      appointmentService.editAppointment(token, id, from, to, clientId, description, location, status);
+      appointmentService.editAppointment(token, id, from, to, clientId, title, description, location, status);
       return ResponseEntity.ok().build();
 
     } catch (Throwable t) {
