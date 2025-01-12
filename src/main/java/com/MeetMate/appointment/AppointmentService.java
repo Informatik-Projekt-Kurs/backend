@@ -18,6 +18,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -62,17 +63,17 @@ public class AppointmentService {
   }
 
   @Transactional
-  public void createAppointment(String token, Instant from, Instant to, long clientId, String title, String description, String location) {
+  public void createAppointment(String token, Instant from, Instant to, Long clientId, String title, String description, String location) {
     Company company = getCompanyFromToken(token);
 
-    if(userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
+    if(clientId != null && userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
 
     long appointmentId = appointmentSequenceService.getCurrentValue();
 
     Appointment appointment = new Appointment(appointmentId, company.getId());
     if (from != null) appointment.setFrom(from);
     if (to != null) appointment.setTo(to);
-    if (clientId != 0) appointment.setClientId(clientId);
+    if (clientId != null) appointment.setClientId(clientId);
     if (title != null && !title.isEmpty()) appointment.setTitle(title);
     if (description != null && !description.isEmpty()) appointment.setDescription(description);
     if (location != null && !location.isEmpty()) appointment.setLocation(location);
@@ -83,10 +84,10 @@ public class AppointmentService {
   }
 
   @Transactional
-  public void editAppointment(String token, long appointmentId, Instant from, Instant to, long clientId, String title, String description, String location, AppointmentStatus status) {
+  public void editAppointment(String token, long appointmentId, Instant from, Instant to, Long clientId, String title, String description, String location, AppointmentStatus status) {
     Company company = getCompanyFromToken(token);
 
-    if(userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
+    if(clientId != null && userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
 
     if (appointmentNotOfCompany(company, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
