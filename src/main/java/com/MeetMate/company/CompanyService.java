@@ -68,7 +68,7 @@ public class CompanyService {
     return availableAppointments;
   }
 
-  public ArrayList<Appointment> getAllAppointments(long id){
+  public ArrayList<Appointment> getAllAppointments(long id) {
     return appointmentRepository.findAppointmentsByCompanyId(id);
   }
 
@@ -90,12 +90,11 @@ public class CompanyService {
     ArrayList<Appointment> appointments = appointmentRepository.findAppointmentsByCompanyId(company.getId());
     ArrayList<User> clients = new ArrayList<>();
 
+    User client;
     for (Appointment appointment : appointments) {
-      clients.add(
-          userRepository.findUserById(
-              appointment.getClientId()
-          ).orElse(null)
-      );
+      client = userRepository.findUserById(appointment.getClientId()).orElse(null);
+      if (clients.contains(client)) continue;
+      clients.add(client);
     }
 
     ArrayList<GetResponse> response = new ArrayList<>();
