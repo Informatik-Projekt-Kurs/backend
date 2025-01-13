@@ -56,6 +56,9 @@ public class AppointmentController {
       if (tc == EntityNotFoundException.class)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
 
+      if (tc == IllegalStateException.class)
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("message: " + t.getMessage());
+
       if (tc == IllegalAccessException.class)
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("message: " + t.getMessage());
 
