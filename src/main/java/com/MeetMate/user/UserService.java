@@ -214,13 +214,15 @@ public class UserService {
   public List<Appointment> getRelevantAppointments(String token) throws IllegalAccessException {
     List<Appointment> appointments = getUserAppointments(token);
     appointments.sort((a1, a2) -> a1.getFrom().compareTo(a2.getFrom())); //Merge sort
+    System.out.println(appointments);
     int index;
     for (index = 0; index < appointments.size() - 1; index++) {
-      if (appointments.get(index).getFrom().isBefore(Instant.now()))
+      System.out.println(index);
+      if (appointments.get(index).getFrom().isAfter(Instant.now()))
         break;
     }
     int outputSize = appointments.size() <= 4 ? appointments.size() : 4;
-
+    System.out.println(outputSize);
     return appointments.subList(index, index+outputSize);
   }
 }
