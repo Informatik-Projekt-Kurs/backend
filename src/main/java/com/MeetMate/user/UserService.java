@@ -216,11 +216,10 @@ public class UserService {
     appointments.sort((a1, a2) -> a1.getFrom().compareTo(a2.getFrom())); //Merge sort
     int index;
     for (index = 0; index < appointments.size() - 1; index++) {
-      if (appointments.get(index).getFrom().isBefore(Instant.now()))
+      if (appointments.get(index).getFrom().isAfter(Instant.now()))
         break;
     }
     int outputSize = appointments.size() <= 4 ? appointments.size() : 4;
-
     return appointments.subList(index, index+outputSize);
   }
 }

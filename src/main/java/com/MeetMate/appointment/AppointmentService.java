@@ -47,18 +47,26 @@ public class AppointmentService {
   public void bookAppointment(String token, long appointmentId) throws IllegalAccessException {
     User user = getUserFromToken(token);
 
-    Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
-        .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
-
     if (user.getRole() != UserRole.CLIENT)
       throw new IllegalAccessException("Only clients can book appointments");
+
+    Appointment appointment = appointmentRepository.findAppointmentById(appointmentId)
+        .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
 
     Query query = new Query(Criteria.where("id").is(appointmentId));
     Update update = new Update();
 
-    update.set("clientId", user.getId());
-    update.set("status", AppointmentStatus.BOOKED);
-
+    if (appointment.getStatus() != AppointmentStatus.PENDING) {
+      if (user.getId() == appointment.getClientId()) {
+        update.set("clientId", null);
+        update.set("status", AppointmentStatus.PENDING);
+      } else {
+        throw new IllegalStateException("Appointment already booked");
+      }
+    } else {
+      update.set("clientId", user.getId());
+      update.set("status", AppointmentStatus.BOOKED);
+    }
     mongoTemplate.updateFirst(query, update, Appointment.class);
   }
 
@@ -66,7 +74,7 @@ public class AppointmentService {
   public void createAppointment(String token, Instant from, Instant to, Long clientId, String title, String description, String location) {
     Company company = getCompanyFromToken(token);
 
-    if(clientId != null && userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
+    if (clientId != null && userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
 
     long appointmentId = appointmentSequenceService.getCurrentValue();
 
@@ -87,7 +95,7 @@ public class AppointmentService {
   public void editAppointment(String token, long appointmentId, Instant from, Instant to, Long clientId, String title, String description, String location, AppointmentStatus status) {
     Company company = getCompanyFromToken(token);
 
-    if(clientId != null && userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
+    if (clientId != null && userIsNotClient(clientId)) throw new IllegalArgumentException("Client is not a User");
 
     if (appointmentNotOfCompany(company, appointmentId))
       throw new IllegalArgumentException("User is not eligible to edit this appointment");
