@@ -82,11 +82,13 @@ public class AppointmentService {
     Appointment appointment = new Appointment(appointmentId, company.getId());
     if (from != null) appointment.setFrom(from);
     if (to != null) appointment.setTo(to);
-    if (clientId != null) appointment.setClientId(clientId);
     if (title != null && !title.isEmpty()) appointment.setTitle(title);
     if (description != null && !description.isEmpty()) appointment.setDescription(description);
     if (location != null && !location.isEmpty()) appointment.setLocation(location);
-    appointment.setStatus(AppointmentStatus.PENDING);
+    if (clientId != null) {
+      appointment.setClientId(clientId);
+      appointment.setStatus(AppointmentStatus.BOOKED);
+    } else appointment.setStatus(AppointmentStatus.PENDING);
 
     appointmentRepository.save(appointment);
     appointmentSequenceService.incrementId();
