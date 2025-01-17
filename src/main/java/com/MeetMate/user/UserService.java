@@ -107,14 +107,14 @@ public class UserService {
   public void updateUser(String token, MultiValueMap<String, String> data) {
     String email = jwtService.extractUserEmail(token);
     String name = data.getFirst("name");
-    String password = passwordEncoder.encode(data.getFirst("password"));
+    String password = data.getFirst("password");
 
     User user =
         userRepository
             .findUserByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
 
-    if (password != null) user.setPassword(password);
+    if (password != null) user.setPassword(passwordEncoder.encode(password));
     if (name != null) user.setName(name);
   }
 
@@ -220,6 +220,6 @@ public class UserService {
         break;
     }
     int outputSize = appointments.size() <= 4 ? appointments.size() : 4;
-    return appointments.subList(index, index+outputSize);
+    return appointments.subList(index, index + outputSize);
   }
 }
