@@ -1,13 +1,12 @@
 package com.MeetMate.response;
 
 import com.MeetMate.enums.UserRole;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 @Data
 @AllArgsConstructor

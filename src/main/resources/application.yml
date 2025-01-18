@@ -1,7 +1,7 @@
 #connecting to a database
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/test
+    url: jdbc:postgresql://localhost:5432/meetmate
     username: postgres
     password: 1234
   jpa:
@@ -15,5 +15,5 @@ spring:
   data:
     mongodb:
       uri: mongodb://root:pass@localhost:27017/admin
-      database: test
+      database: meetmate
       auto-index-creation: true

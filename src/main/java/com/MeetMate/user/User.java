@@ -1,10 +1,9 @@
 package com.MeetMate.user;
 
-import com.MeetMate._experiments.Experimentational;
 import com.MeetMate.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +14,7 @@ import java.util.*;
 @Entity
 @Table(name = "users")
 @Data
+@NoArgsConstructor
 public class User implements UserDetails {
   @Id
   @SequenceGenerator(name = "user_sequence", allocationSize = 1)
@@ -24,32 +24,11 @@ public class User implements UserDetails {
   private String email;
   private String password;
   private LocalDate createdAt;
-  // Last login
   @Enumerated(EnumType.STRING)
   private UserRole role;
   private String refreshToken;
-  // bool verified
   private long associatedCompany;
-//  @ElementCollection
-//  @CollectionTable(name = "subscribed_companies", joinColumns = @JoinColumn(name = "user_id"))
   private ArrayList<Long> subscribedCompanies;
-
-  public User() {}
-
-  @Experimentational
-  public User(Long id, String name, String email, String password) {
-    this.id = id;
-    this.name = name;
-    this.email = email;
-    this.password = password;
-    this.createdAt = LocalDate.now();
-  }
-
-  @Experimentational
-  public User(String email, String password) {
-    this.email = email;
-    this.password = password;
-  }
 
   public User(String name, String email, String password, UserRole role) {
     this.name = name;

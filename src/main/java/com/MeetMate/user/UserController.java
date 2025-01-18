@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.naming.NameAlreadyBoundException;
 
-//.body("message: " + t.getMessage() + "\nStack trace: " + Arrays.toString(t.getStackTrace()));
-
 @RestController
 @RequestMapping(path = "api/user")
 @RequiredArgsConstructor
@@ -183,7 +181,7 @@ public class UserController {
 
   @GetMapping(path = "appointments")
   @ResponseBody
-  public ResponseEntity<?> getUserAppointments(@RequestHeader(name = "Authorization") String token){
+  public ResponseEntity<?> getUserAppointments(@RequestHeader(name = "Authorization") String token) {
     token = token.substring(7);
     try {
       return ResponseEntity.ok(userService.getUserAppointments(token));
@@ -200,9 +198,10 @@ public class UserController {
           .body("message: " + t.getMessage());
     }
   }
+
   @GetMapping(path = "relevantAppointments")
   @ResponseBody
-  public ResponseEntity<?> getRelevantAppointments(@RequestHeader(name = "Authorization") String token){
+  public ResponseEntity<?> getRelevantAppointments(@RequestHeader(name = "Authorization") String token) {
     token = token.substring(7);
     try {
       return ResponseEntity.ok(userService.getRelevantAppointments(token));

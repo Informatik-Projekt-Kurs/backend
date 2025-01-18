@@ -1,5 +1,12 @@
 package com.MeetMate.enums;
 
 public enum BusinessType {
-
+  DENTIST,
+  PHYSIOTHERAPIST,
+  BARBER,
+  DRIVING_SCHOOL,
+  ACCOUNTANT,
+  CAR_REPAIR,
+  TECHNICAL_SUPPORT,
+  VETERINARIAN
 }

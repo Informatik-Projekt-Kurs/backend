@@ -12,5 +12,4 @@ public class CompanySequence {
   @Id
   String id;
   long value;
-
 }

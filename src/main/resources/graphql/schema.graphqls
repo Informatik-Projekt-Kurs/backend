@@ -1,5 +1,3 @@
-#graphqls for graphql scema
-
 type Query {
 
     #Company Queries
