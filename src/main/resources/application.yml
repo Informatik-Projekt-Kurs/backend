@@ -1,9 +1,9 @@
 #connecting to a database
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/test
-    username: postgres
-    password: 1234
+    url: jdbc:postgresql://app-de8c8d1c-285f-4b13-8977-7608d27a1fae-do-user-15830165-0.k.db.ondigitalocean.com:25060/test?sslmode=require
+    username: test
+    password: AVNS_lagwy7qKce2YNYdXCH5
   jpa:
     generate-ddl: true
     hibernate:
