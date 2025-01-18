@@ -36,18 +36,6 @@ public class UserController {
     }
   }
 
-  @GetMapping(path = "getAll")
-  @ResponseBody
-  public ResponseEntity<?> getAllUsers() {
-    try {
-      return ResponseEntity.ok(userService.getAllUsers());
-
-    } catch (Throwable t) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body("message: " + t.getMessage());
-    }
-  }
-
   @PostMapping(path = "signup")
   @ResponseBody
   public ResponseEntity<?> registerNewUser(@RequestParam MultiValueMap<String, String> data) {

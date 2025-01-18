@@ -12,7 +12,7 @@ services:
       - postgres
       - mongodb
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/meetmate
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234
       SPRING_DATA_MONGODB_URI: mongodb://root:pass@mongodb:27017/admin

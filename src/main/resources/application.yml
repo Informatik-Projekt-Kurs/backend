@@ -1,9 +1,9 @@
 #connecting to a database
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/meetmate
-    username: postgres
-    password: 1234
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/test}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:1234}
   jpa:
     generate-ddl: true
     hibernate:
@@ -14,6 +14,6 @@ spring:
         format_sql: true
   data:
     mongodb:
-      uri: mongodb://root:pass@localhost:27017/admin
-      database: meetmate
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://root:pass@localhost:27017/admin}
+      database: ${MONGODB_DATABASE:test}
       auto-index-creation: true
