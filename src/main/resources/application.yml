@@ -1,9 +1,9 @@
 #connecting to a database
 spring:
   datasource:
-    url: jdbc:postgresql://app-de8c8d1c-285f-4b13-8977-7608d27a1fae-do-user-15830165-0.k.db.ondigitalocean.com:25060/test?sslmode=require
-    username: test
-    password: AVNS_lagwy7qKce2YNYdXCH5
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/test}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:1234}
   jpa:
     generate-ddl: true
     hibernate:
@@ -14,6 +14,6 @@ spring:
         format_sql: true
   data:
     mongodb:
-      uri: mongodb+srv://doadmin:3sQ24W19i75VItn6@db-mongodb-fra1-59236-b223d7ba.mongo.ondigitalocean.com/admin?tls=true&authSource=admin
-      database: admin
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://root:pass@localhost:27017/admin}
+      database: ${MONGODB_DATABASE:test}
       auto-index-creation: true
