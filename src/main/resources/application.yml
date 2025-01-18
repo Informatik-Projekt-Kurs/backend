@@ -14,6 +14,6 @@ spring:
         format_sql: true
   data:
     mongodb:
-      uri: mongodb://root:pass@localhost:27017/admin
-      database: test
+      uri: mongodb+srv://doadmin:3sQ24W19i75VItn6@db-mongodb-fra1-59236-b223d7ba.mongo.ondigitalocean.com/admin?tls=true&authSource=admin
+      database: admin
       auto-index-creation: true
