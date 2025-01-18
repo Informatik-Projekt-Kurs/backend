@@ -1,6 +1,6 @@
 package com.MeetMate.security;
 
-import com.MeetMate.experiments.Experimentational;
+import com.MeetMate.enums.UserRole;
 import com.MeetMate.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -8,11 +8,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
@@ -26,7 +27,7 @@ public class JwtService {
     return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
   }
 
-  public boolean isTokenExpired(String token) {
+  private boolean isTokenExpired(String token) {
     long expirationDate = extractClaim(token, Claims::getExpiration).getTime();
     return expirationDate < System.currentTimeMillis();
   }
@@ -52,16 +53,15 @@ public class JwtService {
         .compact();
   }
 
-  // Claims::getSubject
   public String extractUserEmail(String token) {
     return extractClaim(token, Claims::getSubject);
   }
 
-  @Experimentational
-  @SuppressWarnings("unchecked")
-  public <ContentType> ContentType extractClaimGeneric(String claimName, String token) {
+  public long extractCompanyId(String token) {
     Claims claims = extractAllClaims(token);
-    return (ContentType) claims.get(claimName);
+    if (claims.get("role").equals(UserRole.COMPANY_OWNER.toString()))
+      return (long) claims.get("companyId");
+    throw new IllegalArgumentException("User is not a company owner");
   }
 
   public <ContentType> ContentType extractClaim(

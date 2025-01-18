@@ -1,5 +1,9 @@
 package com.MeetMate.user;
 
+import com.MeetMate.appointment.Appointment;
+import com.MeetMate.appointment.AppointmentRepository;
+import com.MeetMate.company.CompanyRepository;
+import com.MeetMate.enums.UserRole;
 import com.MeetMate.response.AuthenticationResponse;
 import com.MeetMate.response.GetResponse;
 import com.MeetMate.response.RefreshResponse;
@@ -7,15 +11,16 @@ import com.MeetMate.security.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
-import javax.naming.NameAlreadyBoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
+
+import javax.naming.NameAlreadyBoundException;
+import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,60 +30,87 @@ public class UserService {
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
+  private final CompanyRepository companyRepository;
+  private final AppointmentRepository appointmentRepository;
 
-  public GetResponse getUserByEmail(String token) {
+  public GetResponse getUser(String token) {
     String email = jwtService.extractUserEmail(token);
+    User user = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-    Optional<User> userOptional = userRepository.findUserByEmail(email);
-
-    User user =
-        userRepository
-            .findUserByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
-
-    return GetResponse.builder()
+    GetResponse response = GetResponse.builder()
         .id(user.getId())
         .name(user.getName())
         .created_at(user.getCreatedAt())
         .email(user.getEmail())
         .role(user.getRole())
         .build();
+
+    switch (user.getRole()) {
+      case COMPANY_OWNER, COMPANY_MEMBER -> response.setAssociatedCompany(user.getAssociatedCompany());
+      case CLIENT -> response.setSubscribedCompanies(user.getSubscribedCompanies());
+      default -> throw new IllegalStateException(user.getRole() + " is invalid!");
+    }
+
+    return response;
   }
 
-  public List<User> getAllUsers() {
-    return userRepository.findAll();
-  }
-
+  @Transactional
   public void registerNewUser(MultiValueMap<String, String> data) throws NameAlreadyBoundException {
     String email = data.getFirst("email");
     String name = data.getFirst("name");
     String password = data.getFirst("password");
+    String role = data.getFirst("role");
+    String associatedCompanyStr = data.getFirst("associatedCompany");
+    Long associatedCompany = null;
 
-    if (email == null
-        || email.isEmpty()
-        || password == null
-        || password.isEmpty()
-        || name == null
-        || name.isEmpty()) throw new IllegalArgumentException("Required argument is missing");
+    // Validate required fields
+    if (email == null || email.isEmpty()
+        || password == null || password.isEmpty()
+        || name == null || name.isEmpty()) {
+      throw new IllegalArgumentException("Email, password, and name are required");
+    }
 
     if (userRepository.findUserByEmail(email).isPresent())
-      throw new NameAlreadyBoundException("Email taken");
+      throw new NameAlreadyBoundException("Email already taken");
 
-    userRepository.save(new User(name, email, passwordEncoder.encode(password)));
+    // Set default role if not provided
+    UserRole userRole = (role == null || role.isEmpty()) ? UserRole.CLIENT : UserRole.valueOf(role);
+
+    User user = new User(name, email, passwordEncoder.encode(password), userRole);
+
+    if (associatedCompanyStr != null && !associatedCompanyStr.isEmpty())
+      try {
+        associatedCompany = Long.parseLong(associatedCompanyStr);
+      } catch (NumberFormatException nfe) {
+        throw new IllegalArgumentException("Invalid associatedCompany value", nfe);
+      }
+
+    switch (userRole) {
+      case CLIENT -> user.setAssociatedCompany(-1L);
+      case COMPANY_OWNER, COMPANY_MEMBER -> {
+        if (associatedCompany != null) user.setAssociatedCompany(associatedCompany);
+        else
+          throw new IllegalArgumentException("associatedCompany is required for COMPANY_OWNER and COMPANY_MEMBER roles");
+      }
+      default -> throw new IllegalStateException(role + " is invalid!");
+    }
+
+    userRepository.save(user);
   }
 
   @Transactional
   public void updateUser(String token, MultiValueMap<String, String> data) {
     String email = jwtService.extractUserEmail(token);
     String name = data.getFirst("name");
-    String password = passwordEncoder.encode(data.getFirst("password"));
+    String password = data.getFirst("password");
 
     User user =
         userRepository
             .findUserByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
 
-    if (password != null) user.setPassword(password);
+    if (password != null) user.setPassword(passwordEncoder.encode(password));
     if (name != null) user.setName(name);
   }
 
@@ -108,6 +140,7 @@ public class UserService {
         .build();
   }
 
+  @Transactional
   public RefreshResponse refreshAccessToken(String refreshToken) {
     String email = jwtService.extractUserEmail(refreshToken);
     User user =
@@ -126,17 +159,63 @@ public class UserService {
     return RefreshResponse.builder().access_Token(token).expires_at(exp).build();
   }
 
-  public void deleteUser(String token) {
+  @Transactional
+  public void deleteUser(String token) throws IllegalAccessException {
     String email = jwtService.extractUserEmail(token);
+    User user = userRepository
+        .findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
+    if (user.getRole() == UserRole.COMPANY_OWNER
+        || user.getRole() == UserRole.COMPANY_MEMBER)
+      throw new IllegalAccessException("Company owners and members cannot delete their accounts");
 
-    User user =
-        userRepository
-            .findUserByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
-    long userId = user.getId();
-    if (!userRepository.existsById(userId))
-      throw new EntityNotFoundException("User does not exist");
+    userRepository.deleteByEmail(email);
+  }
 
-    userRepository.deleteById(userId);
+  @Transactional
+  public void subscribeToCompany(String token, long companyId) {
+    String email = jwtService.extractUserEmail(token);
+    User user = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist."));
+
+    if (user.getRole() != UserRole.CLIENT)
+      throw new IllegalArgumentException("Only CLIENT users can subscribe to companies");
+
+    if (user.getSubscribedCompanies().contains(companyId))
+      user.getSubscribedCompanies()
+          .remove(companyRepository.findCompanyById(companyId)
+              .orElseThrow(() -> new EntityNotFoundException("Company could not be found!"))
+              .getId()
+          );
+    else
+      user.getSubscribedCompanies()
+          .add(companyRepository.findCompanyById(companyId)
+              .orElseThrow(() -> new EntityNotFoundException("Company could not be found!"))
+              .getId()
+          );
+
+  }
+
+  public List<Appointment> getUserAppointments(String token) throws IllegalAccessException {
+    String email = jwtService.extractUserEmail(token);
+    User user = userRepository.findUserByEmail(email)
+        .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+
+    if (user.getRole() == UserRole.COMPANY_OWNER || user.getRole() == UserRole.COMPANY_MEMBER)
+      throw new IllegalAccessException("Company owners and members cannot have appointments");
+
+    return appointmentRepository.findAppointmentsByClientId(user.getId());
+  }
+
+  public List<Appointment> getRelevantAppointments(String token) throws IllegalAccessException {
+    List<Appointment> appointments = getUserAppointments(token);
+    appointments.sort((a1, a2) -> a1.getFrom().compareTo(a2.getFrom())); //Merge sort
+    int index;
+    for (index = 0; index < appointments.size() - 1; index++) {
+      if (appointments.get(index).getFrom().isAfter(Instant.now()))
+        break;
+    }
+    int outputSize = appointments.size() <= 4 ? appointments.size() : 4;
+    return appointments.subList(index, index + outputSize);
   }
 }

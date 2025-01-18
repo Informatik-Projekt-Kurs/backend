@@ -1,64 +1,42 @@
 package com.MeetMate.user;
 
-import com.MeetMate.experiments.Experimentational;
-import com.MeetMate.roles.Role;
+import com.MeetMate.enums.UserRole;
 import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
+import java.util.*;
+
 @Entity
 @Table(name = "users")
 @Data
+@NoArgsConstructor
 public class User implements UserDetails {
   @Id
   @SequenceGenerator(name = "user_sequence", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
-  private Long id;
-
+  private long id;
   private String name;
-
-  private LocalDate createdAt;
-
   private String email;
   private String password;
-  private String refreshToken;
-
+  private LocalDate createdAt;
   @Enumerated(EnumType.STRING)
-  private Role role;
+  private UserRole role;
+  private String refreshToken;
+  private long associatedCompany;
+  private ArrayList<Long> subscribedCompanies;
 
-  // Last login
-  // bool verified
-
-  public User() {}
-
-  @Experimentational
-  public User(Long id, String name, String email, String password) {
-    this.id = id;
+  public User(String name, String email, String password, UserRole role) {
     this.name = name;
     this.email = email;
     this.password = password;
     this.createdAt = LocalDate.now();
-  }
-
-  public User(String name, String email, String password) {
-    this.name = name;
-    this.email = email;
-    this.password = password;
-    this.createdAt = LocalDate.now();
-    role = Role.CLIENT;
-  }
-
-  @Experimentational
-  public User(String email, String password) {
-    this.email = email;
-    this.password = password;
+    this.role = role;
+    subscribedCompanies = new ArrayList<>();
   }
 
   public Map<String, Object> generateMap() {
