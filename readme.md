@@ -17,8 +17,8 @@ This will run the docker compose file, download all necessary files, and configu
 
 ### Stopping the application
 
-To stop the running application use either `Ctrl + C` in the terminal where the containers are running, stopping it in
-the docker user interface or
+To stop the running application use either `Ctrl + C` in the terminal where the containers are running, stop it in
+the docker user interface or use
 > docker-compose stop
 
 To delete the created containers use:
