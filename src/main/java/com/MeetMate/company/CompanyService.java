@@ -50,13 +50,15 @@ public class CompanyService {
     ArrayList<Appointment> appointments = appointmentRepository.findAppointmentsByCompanyId(id);
     ArrayList<Appointment> availableAppointments = new ArrayList<>();
 
+    Instant appointmentTime;
+    boolean isSameDay;
     // Get start of current day
     LocalDate today = LocalDate.now(ZoneId.systemDefault());
     Instant startOfToday = today.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
     for (Appointment appointment : appointments) {
-      Instant appointmentTime = appointment.getFrom();
-      boolean isSameDay = date == null ||
+      appointmentTime = appointment.getFrom();
+      isSameDay = date == null ||
           LocalDate.ofInstant(date, ZoneId.systemDefault())
               .equals(LocalDate.ofInstant(appointmentTime, ZoneId.systemDefault()));
 
@@ -190,12 +192,12 @@ public class CompanyService {
 
     if (isNotCompanyOwner(email)
         && isNotCompanyMember(company, userRepository.findUserByEmail(email)
-        .orElseThrow(() -> new EntityNotFoundException("User not found!"))
+        .orElseThrow(() -> new EntityNotFoundException("User not found"))
         .getId()))
       throw new IllegalAccessException("Not a company member");
 
     if (isNotCompanyMember(company, memberId))
-      throw new EntityNotFoundException("Not a company member!");
+      throw new EntityNotFoundException("Not a company member");
 
     return getMemberById(memberId);
   }

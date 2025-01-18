@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
       return;
     }
-    
+
     jwt = authHeader.substring(7);// beginIndex is 7 bc "Bearer " is 7
     userEmail = jwtService.extractUserEmail(jwt);
 

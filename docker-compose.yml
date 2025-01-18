@@ -1,4 +1,5 @@
 version: '3'
+
 services:
   meet-mate:
     build:
@@ -8,14 +9,30 @@ services:
     ports:
       - "8081:8080"
     depends_on:
+      - postgres
       - mongodb
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://app-de8c8d1c-285f-4b13-8977-7608d27a1fae-do-user-15830165-0.k.db.ondigitalocean.com:25060/test?sslmode=require
-      SPRING_DATASOURCE_USERNAME: test
-      SPRING_DATASOURCE_PASSWORD: AVNS_lagwy7qKce2YNYdXCH5
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
       SPRING_DATA_MONGODB_URI: mongodb://root:pass@mongodb:27017/admin
     networks:
+      - postgres-net
       - mongo-net
+
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: test
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    networks:
+      - postgres-net
 
   mongodb:
     image: mongo:4.4
@@ -50,5 +67,7 @@ volumes:
   data: {}
 
 networks:
+  postgres-net:
+    driver: bridge
   mongo-net:
     driver: bridge

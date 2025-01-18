@@ -8,7 +8,7 @@ import java.util.Optional;
 @Repository
 public interface CompanyRepository extends MongoRepository<Company, Long> {
 
-    Optional<Company> findCompanyByOwnerEmail(String ownerEmail);
+  Optional<Company> findCompanyByOwnerEmail(String ownerEmail);
 
-    Optional<Company> findCompanyById(long id);
+  Optional<Company> findCompanyById(long id);
 }

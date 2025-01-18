@@ -21,11 +21,9 @@ public class AppointmentSequenceService {
     mongoTemplate.updateFirst(query, update, AppointmentSequence.class);
   }
 
-  public long getCurrentValue(){
+  public long getCurrentValue() {
     Query query = new Query(Criteria.where("_id").is("appointment_sequence"));
     AppointmentSequence sequence = mongoTemplate.findOne(query, AppointmentSequence.class);
     return sequence.getValue();
   }
-
-
 }

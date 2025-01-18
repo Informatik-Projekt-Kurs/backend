@@ -12,5 +12,4 @@ public class AppointmentSequence {
   @Id
   String id;
   long value;
-
 }

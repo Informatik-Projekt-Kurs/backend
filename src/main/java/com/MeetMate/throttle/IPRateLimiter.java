@@ -57,7 +57,6 @@ public class IPRateLimiter extends OncePerRequestFilter {
     while (!requests.isEmpty()
         && System.currentTimeMillis() - requests.get(ip).getFirst() > refreshTime)
       requests.get(ip).remove();
-
   }
 
 }

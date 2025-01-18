@@ -55,10 +55,6 @@ public class UserService {
     return response;
   }
 
-  public List<User> getAllUsers() {
-    return userRepository.findAll();
-  }
-
   @Transactional
   public void registerNewUser(MultiValueMap<String, String> data) throws NameAlreadyBoundException {
     String email = data.getFirst("email");

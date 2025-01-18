@@ -18,7 +18,7 @@ public class GlobalRateLimiter extends OncePerRequestFilter {
 
   private final LinkedList<Long> requests = new LinkedList<>();
   private final int maxRequests = 500;
-  private final long refreshTime = 1000 * 1; // 1 second
+  private final long refreshTime = 1000; // 1 second
 
   @Override
   protected void doFilterInternal(
@@ -44,7 +44,6 @@ public class GlobalRateLimiter extends OncePerRequestFilter {
     while (!requests.isEmpty()
         && System.currentTimeMillis() - requests.getFirst() > refreshTime)
       requests.remove();
-
   }
 
 }

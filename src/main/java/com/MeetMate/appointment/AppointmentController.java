@@ -24,21 +24,12 @@ public class AppointmentController {
   @QueryMapping
   public Appointment getAppointment(
       @ContextValue String token,
-      @Argument long id
-  ) {
+      @Argument long id) {
     token = token.substring(7);
     try {
       return appointmentService.getAppointment(token, id);
     } catch (Throwable t) {
-      Class<? extends Throwable> tc = t.getClass();
       return null;
-//            if (tc == EntityNotFoundException.class)
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("message: " + t.getMessage());
-//
-//            if (tc == IllegalArgumentException.class)
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("message: " + t.getMessage());
-//
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("message: " + t.getMessage());
     }
   }
 
@@ -72,7 +63,6 @@ public class AppointmentController {
       @Argument Instant from,
       @Argument Instant to,
       @Argument Long clientId,
-//      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
       @Argument String title,
       @Argument String description,
       @Argument String location
@@ -102,7 +92,6 @@ public class AppointmentController {
       @Argument Instant from,
       @Argument Instant to,
       @Argument Long clientId,
-//      @Argument Select Prompt → f.E. medical industry: Untersuchung, Operation,
       @Argument String title,
       @Argument String description,
       @Argument String location,

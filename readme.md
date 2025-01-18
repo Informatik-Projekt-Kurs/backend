@@ -8,8 +8,9 @@ All the following commands are to be executed in the root directory of the proje
 ### Running the application with Docker Compose
 
 When the docker engine is running, start the application using
-
-> docker-compose up
+```
+docker-compose up
+```
 
 This will run the docker compose file, download all necessary files, and configure the containers.
 
@@ -17,18 +18,22 @@ This will run the docker compose file, download all necessary files, and configu
 
 ### Stopping the application
 
-To stop the running application use either `Ctrl + C` in the terminal where the containers are running, stop it in
-the docker user interface or use
-> docker-compose stop
+To stop the running application use either `Ctrl + C` in the terminal where the containers are running, stopping it in
+the docker user interface or
+```
+docker-compose stop
+```
 
 To delete the created containers use:
 
-> docker-compose down
+```
+docker-compose down
+```
 
 ## Testing the endpoints
 
-For testing we recommend using Postman. It allows to send single requests to each endpoint, complemented with a user
-friendly interface it results in a easy testing experience. The endpoints in question are divided into RESTful and
+For testing we recommend using Postman. It allows to send single requests to each endpoint, complemented with a 
+user-friendly interface it results in a easy testing experience. The endpoints in question are divided into RESTful and
 GraphQL.
 
 ### Companies and Appointments
@@ -42,16 +47,16 @@ The user requests, using RESTful, are a bit more complicated. These all live on 
 their parameters set manually. While parameters are given in the format url form encoded data, the access tokens have to
 be added into the "bearer" part of the authentication section.
 
-| `localhost:8081`                 | Parameters                    |
-|----------------------------------|-------------------------------|
-| `/api/user/get`                  | access token*                 |
-| `/api/user/signup`               | name*, email*, password*      |
-| `/api/user/login`                | email*, password*             |
-| `/api/user/refresh`              | access token*                 |
-| `/api/user/update`               | access token*, name, password |
-| `/api/user/delete`               | access token*                 |
-| `/api/user/subscribe`            | access token*, companyId      |
-| `/api/user/appointments`         | access token*                 |
-| `/api/user/relevantAppointments` | access token*                 |
+| Method | Endpoint `localhost:8081`        | Parameters                    |
+|--------|----------------------------------|-------------------------------|
+| GET    | `/api/user/get`                  | access token*                 |
+| POST   | `/api/user/signup`               | name*, email*, password*      |
+| POST   | `/api/user/login`                | email*, password*             |
+| POST   | `/api/user/refresh`              | refresh token*                |
+| PUT    | `/api/user/update`               | access token*, name, password |
+| DELETE | `/api/user/delete`               | access token*                 |
+| PUT    | `/api/user/subscribe`            | access token*, companyId      |
+| GET    | `/api/user/appointments`         | access token*                 |
+| GET    | `/api/user/relevantAppointments` | access token*                 |
 
 *values are required
