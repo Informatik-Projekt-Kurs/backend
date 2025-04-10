@@ -99,6 +99,9 @@ public class CompanyService {
       clients.add(client);
     }
 
+    if (clients.isEmpty())
+      return new ArrayList<GetResponse>();
+
     ArrayList<GetResponse> response = new ArrayList<>();
 
     for (User user : clients) {
