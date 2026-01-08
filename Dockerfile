@@ -7,7 +7,7 @@ COPY src/ ./src/
 RUN mvn clean package -DskipTests=true
 
 # Run the application
-FROM openjdk:17
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 # Create a group and user
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
